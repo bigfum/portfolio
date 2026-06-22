@@ -1,0 +1,6 @@
+{
+    "name": "portfolio",
+    "assets": {
+        "directory": "./dist"
+    }
+}
