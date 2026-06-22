@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>bigfum</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <header>
         <h1>bigfum.dev</h1>
-        <p><a href="mailto:contact@bigfum.dev">contact@bigfum.dev</a> // <a href="https://github.com/bigfum">GitHub</a></p>
+        <a href="https://github.com/bigfum">GitHub</a></p>
     </header>
 
-    <main>
+    <!-- <main>
         <div>
             <h2>Project 1</h2>
             <p>Stuff.</p>
@@ -23,7 +25,18 @@
             <h2>Project 2</h2>
             <p>Stuff.</p>
         </div>
-    </main>
+    </main> -->
+
+    <script type="importmap">
+          {
+            "imports": {
+              "three": "https://unpkg.com/three@0.171.0/build/three.module.js",
+              "three/webgpu": "https://unpkg.com/three@0.171.0/build/three.webgpu.js"
+            }
+          }
+        </script>
+    <script type="module" src="app.js"></script>
 
 </body>
+
 </html>
