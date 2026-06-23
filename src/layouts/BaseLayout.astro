@@ -2,6 +2,7 @@
 import { ClientRouter } from "astro:transitions";
 import "../styles/style.css";
 const { title } = Astro.props;
+const pathname = Astro.url.pathname;
 ---
 
 <!doctype html>
@@ -11,22 +12,128 @@ const { title } = Astro.props;
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{title}</title>
         <ClientRouter />
+
+        <script is:inline>
+            const theme = (() => {
+                if (
+                    typeof localStorage !== "undefined" &&
+                    localStorage.getItem("theme")
+                ) {
+                    return localStorage.getItem("theme");
+                }
+                if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                    return "dark";
+                }
+                return "light";
+            })();
+
+            if (theme === "dark") {
+                document.documentElement.setAttribute("data-theme", "dark");
+            } else {
+                document.documentElement.setAttribute("data-theme", "light");
+            }
+        </script>
     </head>
     <body>
-        <canvas id="bg-canvas" transition:persist transition:animate="none"
-        ></canvas>
+        <header class="top-bar">
+            <button
+                id="theme-toggle"
+                class="nav-link"
+                style="cursor: pointer; border: none; background: none; padding: 0;"
+                aria-label="Toggle Dark Mode"
+            >
+                <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="moon-icon"
+                >
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+            </button>
+        </header>
+
         <nav class="sidebar">
             <h1>bigfum.dev</h1>
+
+            <script>
+                function applyTheme() {
+                    const theme = localStorage.getItem("theme") || "light";
+                    document.documentElement.setAttribute("data-theme", theme);
+                }
+
+                function setupThemeToggle() {
+                    const button = document.getElementById("theme-toggle");
+
+                    const toggleTheme = () => {
+                        const isDark =
+                            document.documentElement.getAttribute(
+                                "data-theme",
+                            ) === "dark";
+                        const newTheme = isDark ? "light" : "dark";
+                        document.documentElement.setAttribute(
+                            "data-theme",
+                            newTheme,
+                        );
+                        localStorage.setItem("theme", newTheme);
+                    };
+
+                    if (button) {
+                        button.removeEventListener("click", toggleTheme);
+                        button.addEventListener("click", toggleTheme);
+                    }
+                }
+
+                applyTheme();
+                setupThemeToggle();
+
+                document.addEventListener("astro:after-swap", () => {
+                    applyTheme();
+                    setupThemeToggle();
+                });
+            </script>
+
             <div class="nav-links">
-                <a href="/" class="nav-link">Home</a>
-                <a href="/projects" class="nav-link">Projects</a>
-                <a href="/toys" class="nav-link">Toys</a>
-                <a href="/contact" class="nav-link">Contact</a>
+                <a
+                    href="/"
+                    class:list={[
+                        "nav-link",
+                        Astro.url.pathname === "/" && "active",
+                    ]}>Home</a
+                >
+                <a
+                    href="/projects"
+                    class:list={[
+                        "nav-link",
+                        Astro.url.pathname.startsWith("/projects") && "active",
+                    ]}>Projects</a
+                >
+                <a
+                    href="/toys"
+                    class:list={[
+                        "nav-link",
+                        Astro.url.pathname.startsWith("/toys") && "active",
+                    ]}>Toys</a
+                >
+                <a
+                    href="/contact"
+                    class:list={[
+                        "nav-link",
+                        Astro.url.pathname.startsWith("/contact") && "active",
+                    ]}>Contact</a
+                >
             </div>
         </nav>
 
         <main>
-            <slot />
+            <div class="content-wrapper">
+                <slot />
+            </div>
         </main>
 
         <script type="importmap">
@@ -37,6 +144,23 @@ const { title } = Astro.props;
                 }
             }
         </script>
+
         <script type="module" src="/app.js"></script>
+
+        <svg
+            style="height: 0; width: 0; position: absolute; visibility: hidden;"
+        >
+            <defs>
+                <filter id="ink-bleed">
+                    <feComponentTransfer>
+                        <feFuncA type="discrete" tableValues="0 1 1 1"
+                        ></feFuncA>
+                    </feComponentTransfer>
+                </filter>
+            </defs>
+        </svg>
+
+        <canvas id="bg-canvas" transition:persist transition:animate="none"
+        ></canvas>
     </body>
 </html>
