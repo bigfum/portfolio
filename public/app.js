@@ -29,18 +29,15 @@ function loadSceneB(scene) {
 }
 
 async function initEngine() {
-    const scene = new THREE.Scene();
+    const canvas = document.querySelector('#bg-canvas');
+    if (!canvas) return;
 
-    const renderer = new THREE.WebGPURenderer({ antialias: true });
+    const scene = new THREE.Scene();
+    const renderer = new THREE.WebGPURenderer({ canvas: canvas, antialias: true });
 
     await renderer.init();
-
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-    const canvas = renderer.domElement;
-    canvas.id = 'bg-canvas';
-    document.body.appendChild(canvas);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.z = 3;
@@ -63,4 +60,9 @@ async function initEngine() {
     requestAnimationFrame(tick);
 }
 
-initEngine().catch(err => console.error("Engine failed to boot:", err));
+if (!window.bgEngineStarted) {
+    window.bgEngineStarted = true;
+    initEngine().catch(err => console.error("Engine failed to boot:", err));
+} else {
+    console.log("Engine already running seamlessly in background.");
+}

@@ -1,0 +1,42 @@
+---
+import { ClientRouter } from "astro:transitions";
+import "../styles/style.css";
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{title}</title>
+        <ClientRouter />
+    </head>
+    <body>
+        <canvas id="bg-canvas" transition:persist transition:animate="none"
+        ></canvas>
+        <nav class="sidebar">
+            <h1>bigfum.dev</h1>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/projects" class="nav-link">Projects</a>
+                <a href="/toys" class="nav-link">Toys</a>
+                <a href="/contact" class="nav-link">Contact</a>
+            </div>
+        </nav>
+
+        <main>
+            <slot />
+        </main>
+
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.171.0/build/three.module.js",
+                    "three/webgpu": "https://unpkg.com/three@0.171.0/build/three.webgpu.js"
+                }
+            }
+        </script>
+        <script type="module" src="/app.js"></script>
+    </body>
+</html>

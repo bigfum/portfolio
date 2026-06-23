@@ -35,3 +35,138 @@ a {
     z-index: -1;
     pointer-events: none;
 }
+
+.site-container {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 4rem;
+}
+
+nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    width: 200px;
+    position: fixed;
+}
+
+main {
+    margin-left: 240px;
+    flex-grow: 1;
+}
+
+@media (max-width: 768px) {
+    .site-container {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    nav {
+        position: relative;
+        width: 100%;
+        flex-direction: row;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    main {
+        margin-left: 0;
+    }
+}
+
+.nav-link {
+    color: #38bdf8;
+    text-decoration: none;
+    font-size: 1.1rem;
+    position: relative;
+    padding-bottom: 4px;
+    display: inline-block;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    transform: scaleX(0);
+    height: 1px;
+    bottom: .25em;
+    left: 0;
+    background-color: #38bdf8;
+    transform-origin: bottom left;
+    transition: transform 0.1s ease-in-out;
+}
+
+.nav-link:hover::after {
+    transform: scaleX(1);
+}
+
+/* contact form */
+.form-intro {
+    color: #94a3b8;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 500px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-family: 'Eurostile MN', sans-serif;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+}
+
+.contact-form input,
+.contact-form textarea {
+    border: 1px solid #2e3047;
+    border-radius: 6px;
+    padding: 0.75rem;
+    color: #e2e8f0;
+    font-family: 'Eurostile', sans-serif;
+    font-size: 1rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15);
+}
+
+.submit-btn {
+    background-color: #38bdf8;
+    color: #0d0e15;
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    font-family: 'Eurostile MN', sans-serif;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.submit-btn:hover {
+    background-color: #7dd3fc;
+}
+
+.submit-btn:active {
+    transform: scale(0.98);
+}
