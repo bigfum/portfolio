@@ -141,6 +141,21 @@ main {
     opacity: 1;
 }
 
+.theme-btn-mobile {
+    display: none;
+}
+
+.moon-icon {
+    fill: none;
+    stroke: var(--text-color);
+}
+
+[data-theme='dark'] .moon-icon {
+    fill: var(--text-color);
+}
+
+/**/
+
 .moon-icon {
     fill: none;
     stroke: var(--text-color);
@@ -425,6 +440,25 @@ body.menu-active .top-bar {
         background-color: var(--bg-color);
     }
 
+    .theme-btn-desktop {
+        display: none;
+    }
+
+    .theme-btn-mobile {
+        display: block;
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        opacity: 0.6;
+        transition: opacity 0.2s ease;
+        z-index: 1001;
+        pointer-events: auto;
+    }
+
+    .theme-btn-mobile:hover {
+        opacity: 1;
+    }
+
     .nav-links {
         position: fixed;
         top: 3.5rem;
@@ -457,12 +491,6 @@ body.menu-active .top-bar {
             transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
             background-color 0.3s ease,
             border-bottom 0.3s ease;
-    }
-
-    .nav-links.menu-open {
-        max-height: 80vh;
-        opacity: 1;
-        pointer-events: auto;
     }
 
     main {

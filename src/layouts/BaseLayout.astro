@@ -44,7 +44,7 @@ const pathname = Astro.url.pathname;
         <header class="top-bar">
             <button
                 id="theme-toggle"
-                class="nav-link"
+                class="nav-link theme-btn-desktop"
                 style="cursor: pointer; border: none; background: none; padding: 0;"
                 aria-label="Toggle Dark Mode"
             >
@@ -85,8 +85,6 @@ const pathname = Astro.url.pathname;
                 }
 
                 function setupThemeToggle() {
-                    const button = document.getElementById("theme-toggle");
-
                     const toggleTheme = () => {
                         const isDark =
                             document.documentElement.getAttribute(
@@ -100,10 +98,13 @@ const pathname = Astro.url.pathname;
                         localStorage.setItem("theme", newTheme);
                     };
 
-                    if (button) {
+                    const buttons = document.querySelectorAll(
+                        "#theme-toggle, #theme-toggle-mobile",
+                    );
+                    buttons.forEach((button) => {
                         button.removeEventListener("click", toggleTheme);
                         button.addEventListener("click", toggleTheme);
-                    }
+                    });
                 }
 
                 function setupHamburgerMenu() {
@@ -176,6 +177,27 @@ const pathname = Astro.url.pathname;
                         Astro.url.pathname.startsWith("/contact") && "active",
                     ]}>contact</a
                 >
+
+                <button
+                    id="theme-toggle-mobile"
+                    class="theme-btn-mobile"
+                    style="cursor: pointer; border: none; background: none; padding: 0;"
+                    aria-label="Toggle Dark Mode"
+                >
+                    <svg
+                        width="28"
+                        height="28"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="moon-icon"
+                    >
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                    </svg>
+                </button>
             </div>
         </nav>
 
