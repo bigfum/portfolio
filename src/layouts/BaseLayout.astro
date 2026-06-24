@@ -35,6 +35,12 @@ const pathname = Astro.url.pathname;
         </script>
     </head>
     <body>
+        <div class="top-bar-blur">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
         <header class="top-bar">
             <button
                 id="theme-toggle"
@@ -43,8 +49,8 @@ const pathname = Astro.url.pathname;
                 aria-label="Toggle Dark Mode"
             >
                 <svg
-                    width="24"
-                    height="24"
+                    width="32"
+                    height="32"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -60,6 +66,17 @@ const pathname = Astro.url.pathname;
 
         <nav class="sidebar">
             <h1>bigfum.dev</h1>
+
+            <button
+                id="hamburger-btn"
+                class="hamburger-btn"
+                aria-label="Toggle menu"
+                aria-expanded="false"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
 
             <script>
                 function applyTheme() {
@@ -89,12 +106,44 @@ const pathname = Astro.url.pathname;
                     }
                 }
 
+                function setupHamburgerMenu() {
+                    const hamburger = document.getElementById("hamburger-btn");
+                    const navLinks = document.querySelector(".nav-links");
+
+                    if (!hamburger || !navLinks) {
+                        return;
+                    }
+
+                    const toggleMenu = () => {
+                        const isOpen = navLinks.classList.toggle("menu-open");
+                        hamburger.classList.toggle("is-active", isOpen);
+                        hamburger.setAttribute("aria-expanded", String(isOpen));
+                        document.body.classList.toggle("menu-active", isOpen);
+                    };
+
+                    const closeMenu = () => {
+                        navLinks.classList.remove("menu-open");
+                        hamburger.classList.remove("is-active");
+                        hamburger.setAttribute("aria-expanded", "false");
+                        document.body.classList.remove("menu-active");
+                    };
+
+                    if (hamburger && navLinks) {
+                        hamburger.addEventListener("click", toggleMenu);
+                        navLinks.querySelectorAll("a").forEach((link) => {
+                            link.addEventListener("click", closeMenu);
+                        });
+                    }
+                }
+
                 applyTheme();
                 setupThemeToggle();
+                setupHamburgerMenu();
 
                 document.addEventListener("astro:after-swap", () => {
                     applyTheme();
                     setupThemeToggle();
+                    setupHamburgerMenu();
                 });
             </script>
 
@@ -150,14 +199,6 @@ const pathname = Astro.url.pathname;
         <svg
             style="height: 0; width: 0; position: absolute; visibility: hidden;"
         >
-            <defs>
-                <filter id="ink-bleed">
-                    <feComponentTransfer>
-                        <feFuncA type="discrete" tableValues="0 1 1 1"
-                        ></feFuncA>
-                    </feComponentTransfer>
-                </filter>
-            </defs>
         </svg>
 
         <canvas id="bg-canvas" transition:persist transition:animate="none"
