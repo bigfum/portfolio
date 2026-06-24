@@ -41,11 +41,11 @@ const pathname = Astro.url.pathname;
             <span></span>
             <span></span>
         </div>
+        <div class="menu-backdrop"></div>
         <header class="top-bar">
             <button
                 id="theme-toggle"
-                class="nav-link theme-btn-desktop"
-                style="cursor: pointer; border: none; background: none; padding: 0;"
+                class="theme-btn theme-btn-desktop"
                 aria-label="Toggle Dark Mode"
             >
                 <svg
@@ -110,6 +110,7 @@ const pathname = Astro.url.pathname;
                 function setupHamburgerMenu() {
                     const hamburger = document.getElementById("hamburger-btn");
                     const navLinks = document.querySelector(".nav-links");
+                    const backdrop = document.querySelector(".menu-backdrop");
 
                     if (!hamburger || !navLinks) {
                         return;
@@ -129,11 +130,13 @@ const pathname = Astro.url.pathname;
                         document.body.classList.remove("menu-active");
                     };
 
-                    if (hamburger && navLinks) {
-                        hamburger.addEventListener("click", toggleMenu);
-                        navLinks.querySelectorAll("a").forEach((link) => {
-                            link.addEventListener("click", closeMenu);
-                        });
+                    hamburger.addEventListener("click", toggleMenu);
+                    navLinks.querySelectorAll("a").forEach((link) => {
+                        link.addEventListener("click", closeMenu);
+                    });
+
+                    if (backdrop) {
+                        backdrop.addEventListener("click", closeMenu);
                     }
                 }
 

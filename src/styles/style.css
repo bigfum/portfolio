@@ -33,10 +33,15 @@
     box-sizing: border-box;
 }
 
+html,
+body {
+    overscroll-behavior: none;
+}
+
 main {
     grid-column: 2;
     min-height: 100vh;
-    padding: 6rem 4rem;
+    padding: 6rem 6rem;
     display: flex;
     justify-content: flex-start;
 }
@@ -68,7 +73,7 @@ main {
     left: 0;
     width: 450px;
     height: 100vh;
-    padding: 6rem 0rem 0rem 7rem;
+    padding: 6rem 0rem 0rem 6rem;
 }
 
 .nav-links {
@@ -174,7 +179,7 @@ main {
     top: -1rem;
     left: 0;
     right: 0;
-    height: 15rem;
+    height: 17rem;
     z-index: 999;
     pointer-events: none;
 }
@@ -187,25 +192,25 @@ main {
 .top-bar-blur span:nth-child(1) {
     backdrop-filter: blur(1px);
     -webkit-backdrop-filter: blur(1px);
-    background: color-mix(in srgb, var(--bg-color) 40%, transparent);
+    background: color-mix(in srgb, var(--bg-color) 25%, transparent);
     transition: background-color 0.3s ease, color 0.3s ease;
-    mask-image: linear-gradient(to bottom, black 0%, black 25%, transparent 50%);
+    mask-image: linear-gradient(to bottom, black 0%, black 25%, transparent 45%);
 }
 
 .top-bar-blur span:nth-child(2) {
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
-    background: color-mix(in srgb, var(--bg-color) 75%, transparent);
+    background: color-mix(in srgb, var(--bg-color) 50%, transparent);
     transition: background-color 0.3s ease, color 0.3s ease;
-    mask-image: linear-gradient(to bottom, black 0%, black 18%, transparent 37%);
+    mask-image: linear-gradient(to bottom, black 0%, black 18%, transparent 40%);
 }
 
 .top-bar-blur span:nth-child(3) {
     backdrop-filter: blur(7px);
     -webkit-backdrop-filter: blur(7px);
-    background: color-mix(in srgb, var(--bg-color) 100%, transparent);
+    background: color-mix(in srgb, var(--bg-color) 75%, transparent);
     transition: background-color 0.3s ease, color 0.3s ease;
-    mask-image: linear-gradient(to bottom, black 0%, black 12%, transparent 25%);
+    mask-image: linear-gradient(to bottom, black 0%, black 12%, transparent 35%);
 }
 
 .top-bar-blur span:nth-child(4) {
@@ -213,7 +218,7 @@ main {
     -webkit-backdrop-filter: blur(14px);
     background: color-mix(in srgb, var(--bg-color) 100%, transparent);
     transition: background-color 0.3s ease, color 0.3s ease;
-    mask-image: linear-gradient(to bottom, black 0%, black 6%, transparent 13%);
+    mask-image: linear-gradient(to bottom, black 0%, black 6%, transparent 25%);
 }
 
 /* ==========================================================================
@@ -310,6 +315,7 @@ body {
     width: 100%;
     font-family: 'Eurostile', sans-serif;
     font-size: 1rem;
+    color: var(--text-color);
     background-color: var(--form-bg);
     transition: background-color 0.3s ease, color 0.3s ease,
         border-color 0.3s ease;
@@ -392,9 +398,32 @@ body {
     transform: rotate(-45deg);
 }
 
-body.menu-active .top-bar {
-    background-color: var(--bg-color);
-    transition: background-color 0.3s ease;
+/* ==========================================================================
+   MENU BACKDROP (mobile only, full-screen blur+tint behind open menu)
+   ========================================================================== */
+
+.menu-backdrop {
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .menu-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 998;
+        background: color-mix(in srgb, var(--bg-color) 10%, transparent);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease, background-color 0.3s ease;
+    }
+
+    body.menu-active .menu-backdrop {
+        opacity: 1;
+        pointer-events: auto;
+    }
 }
 
 /* ==========================================================================
@@ -434,10 +463,9 @@ body.menu-active .top-bar {
         top: 0;
         left: 0;
         width: 100%;
-        height: auto;
+        height: 3.5rem;
         padding: 0;
         z-index: 1000;
-        background-color: var(--bg-color);
     }
 
     .theme-btn-desktop {
@@ -461,12 +489,14 @@ body.menu-active .top-bar {
 
     .nav-links {
         position: fixed;
-        top: 3.5rem;
+        top: 0;
         left: 0;
         width: 100%;
         margin: 0;
-        padding: 1.5rem;
-        background-color: var(--bg-color);
+        padding: 5rem 1.5rem 1.5rem;
+        background: color-mix(in srgb, var(--bg-color) 85%, transparent);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
         border-bottom: 1px solid var(--border-color);
         gap: 1.25rem;
 
@@ -481,7 +511,7 @@ body.menu-active .top-bar {
     }
 
     .nav-links.menu-open {
-        top: 3.5rem;
+        top: 0;
         opacity: 1;
         transform: translateY(0);
         pointer-events: auto;
