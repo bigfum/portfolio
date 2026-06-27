@@ -1,73 +1,119 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const items = [
+    {
+        title: "pixel",
+        type: "code",
+        summary: "pixel",
+        tags: ["Canvas", "Dithering"],
+        href: "#",
+    },
+];
 ---
 
 <BaseLayout title="bigfum // toys">
-    <h2>toys</h2>
-    <p>
-        Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus
-        ex sapien vitae pellentesque sem placerat. In id cursus mi pretium
-        tellus duis convallis. Tempus leo eu aenean sed diam urna tempor.
-        Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis
-        massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper
-        vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra
-        inceptos himenaeos. Lorem ipsum dolor sit amet consectetur adipiscing
-        elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id
-        cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam
-        urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum
-        egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut
-        hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent
-        per conubia nostra inceptos himenaeos. Lorem ipsum dolor sit amet
-        consectetur adipiscing elit. Quisque faucibus ex sapien vitae
-        pellentesque sem placerat. In id cursus mi pretium tellus duis
-        convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus
-        fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada
-        lacinia integer nunc posuere. Ut hendrerit semper vel class aptent
-        taciti sociosqu. Ad litora torquent per conubia nostra inceptos
-        himenaeos. Lorem ipsum dolor sit amet consectetur adipiscing elit.
-        Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus
-        mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna
-        tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas.
-        Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit
-        semper vel class aptent taciti sociosqu. Ad litora torquent per conubia
-        nostra inceptos himenaeos. Lorem ipsum dolor sit amet consectetur
-        adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem
-        placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu
-        aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus
-        bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc
-        posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora
-        torquent per conubia nostra inceptos himenaeos. Lorem ipsum dolor sit
-        amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae
-        pellentesque sem placerat. In id cursus mi pretium tellus duis
-        convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus
-        fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada
-        lacinia integer nunc posuere. Ut hendrerit semper vel class aptent
-        taciti sociosqu. Ad litora torquent per conubia nostra inceptos
-        himenaeos. Lorem ipsum dolor sit amet consectetur adipiscing elit.
-        Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus
-        mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna
-        tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas.
-        Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit
-        semper vel class aptent taciti sociosqu. Ad litora torquent per conubia
-        nostra inceptos himenaeos. Lorem ipsum dolor sit amet consectetur
-        adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem
-        placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu
-        aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus
-        bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc
-        posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora
-        torquent per conubia nostra inceptos himenaeos. Lorem ipsum dolor sit
-        amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae
-        pellentesque sem placerat. In id cursus mi pretium tellus duis
-        convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus
-        fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada
-        lacinia integer nunc posuere. Ut hendrerit semper vel class aptent
-        taciti sociosqu. Ad litora torquent per conubia nostra inceptos
-        himenaeos. Lorem ipsum dolor sit amet consectetur adipiscing elit.
-        Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus
-        mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna
-        tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas.
-        Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit
-        semper vel class aptent taciti sociosqu. Ad litora torquent per conubia
-        nostra inceptos himenaeos.
-    </p>
+    <div class="home" transition:animate="none">
+        <div class="listing">
+            <section class="section listing-header">
+                <p class="eyebrow">toys</p>
+                <h2>the small things</h2>
+                <p class="lede">code experiments and 2D/3D art</p>
+                <div class="filter-row" role="group" aria-label="Filter toys">
+                    <button class="filter-btn is-active" data-filter="all"
+                        >all</button
+                    >
+                    <button class="filter-btn" data-filter="code">code</button>
+                    <button class="filter-btn" data-filter="art">art</button>
+                </div>
+            </section>
+
+            <section class="section card-grid-section">
+                <div class="card-grid" id="toys-grid">
+                    {
+                        items.map((item) => (
+                            <a
+                                class="card"
+                                data-type={item.type}
+                                href={item.href}
+                            >
+                                <div class="card-thumb">
+                                    <span>image</span>
+                                </div>
+                                <div class="card-body">
+                                    <h3 class="card-title">{item.title}</h3>
+                                    <p class="card-summary">{item.summary}</p>
+                                    <div class="card-tags">
+                                        {item.tags.map((t) => (
+                                            <span class="card-tag">{t}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </a>
+                        ))
+                    }
+                </div>
+            </section>
+        </div>
+
+        <script>
+            function initFilters() {
+                const buttons =
+                    document.querySelectorAll<HTMLButtonElement>(".filter-btn");
+                const cards =
+                    document.querySelectorAll<HTMLAnchorElement>(
+                        "#toys-grid .card",
+                    );
+
+                buttons.forEach((btn) => {
+                    btn.addEventListener("click", () => {
+                        buttons.forEach((b) => b.classList.remove("is-active"));
+                        btn.classList.add("is-active");
+                        const filter = btn.dataset.filter;
+                        cards.forEach((card) => {
+                            const show =
+                                filter === "all" ||
+                                card.dataset.type === filter;
+                            card.style.display = show ? "" : "none";
+                        });
+                    });
+                });
+            }
+
+            function initReveals() {
+                const sections = document.querySelectorAll(".listing .section");
+                const reduceMotion = window.matchMedia(
+                    "(prefers-reduced-motion: reduce)",
+                ).matches;
+
+                if (reduceMotion) {
+                    sections.forEach((el) => el.classList.add("is-visible"));
+                    return;
+                }
+
+                sections.forEach((el) => el.classList.remove("is-visible"));
+
+                const observer = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach((entry) => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add("is-visible");
+                                observer.unobserve(entry.target);
+                            }
+                        });
+                    },
+                    { threshold: 0.15, rootMargin: "0px 0px -10% 0px" },
+                );
+
+                sections.forEach((el) => observer.observe(el));
+            }
+
+            initFilters();
+            initReveals();
+            document.addEventListener("astro:after-swap", () => {
+                initFilters();
+                initReveals();
+            });
+        </script>
+    </div>
 </BaseLayout>

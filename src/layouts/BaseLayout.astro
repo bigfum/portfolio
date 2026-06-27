@@ -24,7 +24,7 @@ const pathname = Astro.url.pathname;
                 if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
                     return "dark";
                 }
-                return "light";
+                return "dark";
             })();
 
             if (theme === "dark") {
@@ -42,27 +42,7 @@ const pathname = Astro.url.pathname;
             <span></span>
         </div>
         <div class="menu-backdrop"></div>
-        <header class="top-bar">
-            <button
-                id="theme-toggle"
-                class="theme-btn theme-btn-desktop"
-                aria-label="Toggle Dark Mode"
-            >
-                <svg
-                    width="32"
-                    height="32"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="moon-icon"
-                >
-                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-                </svg>
-            </button>
-        </header>
+        <header class="top-bar"></header>
 
         <nav class="sidebar">
             <h1>bigfum.dev</h1>
@@ -131,9 +111,6 @@ const pathname = Astro.url.pathname;
                     };
 
                     hamburger.addEventListener("click", toggleMenu);
-                    navLinks.querySelectorAll("a").forEach((link) => {
-                        link.addEventListener("click", closeMenu);
-                    });
 
                     if (backdrop) {
                         backdrop.addEventListener("click", closeMenu);
@@ -182,6 +159,26 @@ const pathname = Astro.url.pathname;
                 >
 
                 <button
+                    id="theme-toggle"
+                    class="theme-btn theme-btn-desktop"
+                    aria-label="Toggle Dark Mode"
+                >
+                    <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="moon-icon"
+                    >
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                    </svg>
+                </button>
+
+                <button
                     id="theme-toggle-mobile"
                     class="theme-btn-mobile"
                     style="cursor: pointer; border: none; background: none; padding: 0;"
@@ -206,6 +203,7 @@ const pathname = Astro.url.pathname;
 
         <main>
             <div class="content-wrapper">
+                <span style="display: block; margin-bottom: 1.625em;"></span>
                 <slot />
             </div>
         </main>
@@ -214,7 +212,8 @@ const pathname = Astro.url.pathname;
             {
                 "imports": {
                     "three": "https://unpkg.com/three@0.171.0/build/three.module.js",
-                    "three/webgpu": "https://unpkg.com/three@0.171.0/build/three.webgpu.js"
+                    "three/webgpu": "https://unpkg.com/three@0.171.0/build/three.webgpu.js",
+                    "three/tsl": "https://unpkg.com/three@0.171.0/build/three.tsl.js"
                 }
             }
         </script>

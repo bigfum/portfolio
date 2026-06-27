@@ -3,69 +3,138 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout title="bigfum // contact">
-    <div class="contact-page">
-        <h2>let's work together</h2>
-        <form
-            action="https://api.web3forms.com/submit"
-            method="POST"
-            class="contact-form"
-        >
-            <input
-                type="hidden"
-                name="access_key"
-                value="ab398ca8-1bd3-45b7-b919-32e041c071eb"
-            />
-
-            <input
-                type="checkbox"
-                name="botcheck"
-                class="hidden"
-                style="display: none;"
-            />
-
-            <input
-                type="hidden"
-                name="subject"
-                value="[bigfum.dev] New Transmission Received"
-            />
-
-            <input type="hidden" name="redirect" value="https://bigfum.dev/" />
-
-            <div class="form-group">
-                <label for="name">name</label>
+    <div class="home" transition:animate="none">
+        <div class="contact-page section">
+            <h2>let's work together</h2>
+            <form
+                action="https://api.web3forms.com/submit"
+                method="POST"
+                class="contact-form"
+            >
                 <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    required
-                    placeholder="anonymous dev"
+                    type="hidden"
+                    name="access_key"
+                    value="ab398ca8-1bd3-45b7-b919-32e041c071eb"
                 />
-            </div>
 
-            <div class="form-group">
-                <label for="email">email</label>
                 <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    required
-                    placeholder="name@domain.com"
+                    type="checkbox"
+                    name="botcheck"
+                    class="hidden"
+                    style="display: none;"
                 />
-            </div>
 
-            <div class="form-group">
-                <label for="message">message</label>
-                <textarea
-                    id="message"
-                    name="message"
-                    rows="6"
-                    required
-                    placeholder="type your message here..."></textarea>
-            </div>
+                <input
+                    type="hidden"
+                    name="subject"
+                    value="[bigfum.dev] New Transmission Received"
+                />
 
-            <button type="submit" class="submit-btn">
-                SEND&ensp;&ensp;▶
-            </button>
-        </form>
+                <input
+                    type="hidden"
+                    name="redirect"
+                    value="https://bigfum.dev/"
+                />
+
+                <div class="form-group">
+                    <label for="name">name</label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        required
+                        placeholder="anonymous dev"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="email">email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        placeholder="name@domain.com"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="message">message</label>
+                    <textarea
+                        id="message"
+                        name="message"
+                        required
+                        placeholder="type your message here..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    SEND&ensp;&ensp;▶
+                </button>
+                <div class="clock-container">
+                    <p class="cta-time">
+                        it is <span id="clock">[fetching]</span> for me
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        <script>
+            function updateClock() {
+                const now = new Date();
+
+                const options = {
+                    timeZone: "America/Denver",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true,
+                } as const;
+
+                const timeString = now.toLocaleString("en-US", options);
+
+                const clockElement = document.getElementById("clock");
+                if (clockElement) {
+                    clockElement.textContent = timeString;
+                }
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            let revealObserver: IntersectionObserver | undefined;
+
+            function initReveals() {
+                const sections =
+                    document.querySelectorAll<HTMLElement>(".home .section");
+                const reduceMotion = window.matchMedia(
+                    "(prefers-reduced-motion: reduce)",
+                ).matches;
+
+                revealObserver?.disconnect();
+
+                if (reduceMotion) {
+                    sections.forEach((el) => el.classList.add("is-visible"));
+                    return;
+                }
+
+                sections.forEach((el) => el.classList.remove("is-visible"));
+
+                revealObserver = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach((entry) => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add("is-visible");
+                                revealObserver?.unobserve(entry.target);
+                            }
+                        });
+                    },
+                    { threshold: 0.15, rootMargin: "0px 0px -10% 0px" },
+                );
+
+                sections.forEach((el) => revealObserver?.observe(el));
+            }
+
+            initReveals();
+            document.addEventListener("astro:after-swap", initReveals);
+        </script>
     </div>
 </BaseLayout>

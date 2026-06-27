@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { initPathScene } from './scenes/rooms.js';
+import { loadSceneC } from './scenes/fire.js';
 
 // sc 1: box
 function loadSceneA(scene, camera) {
@@ -46,9 +47,10 @@ async function initEngine() {
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 
-    const scenePickers = [loadSceneA, loadSceneB, initPathScene];
-    const chosenPicker = scenePickers[Math.floor(Math.random() * scenePickers.length)];
-
+    const scenePickers = [loadSceneA, loadSceneB, initPathScene, loadSceneC];
+    let chosenPicker = scenePickers[Math.floor(Math.random() * scenePickers.length)];
+    chosenPicker = loadSceneC;
+    console.log('[engine] chosen scene:', chosenPicker.name);
     const updateSceneAnimation = chosenPicker(scene, camera);
 
     window.addEventListener('resize', () => {
