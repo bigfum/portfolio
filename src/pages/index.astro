@@ -1,127 +1,48 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { Image } from "astro:assets";
-
-const stack = [
-	{ name: "Python", icon: "python" },
-	{ name: "C++", icon: "cplusplus" },
-	{ name: "JavaScript", icon: "javascript" },
-	{ name: "Java", icon: "openjdk" },
-	{ name: "SQL", icon: "mysql" },
-	{ name: "GDScript", icon: "godotengine" },
-	{ name: "HTML", icon: "html5" },
-	{ name: "CSS", icon: "css" },
-	{ name: "R", icon: "r" },
-	{ name: "Bash", icon: "gnubash" },
-	{ name: "Git", icon: "git" },
-	{ name: "GitHub", icon: "github" },
-	{ name: "VS Code", icon: "visualstudiocode" },
-	{ name: "Node.js", icon: "nodedotjs" },
-	{ name: "Astro", icon: "astro" },
-	{ name: "React", icon: "react" },
-	{ name: "Next.js", icon: "nextdotjs" },
-	{ name: "Docker", icon: "docker" },
-	{ name: "ROS", icon: "ros" },
-	{ name: "Godot", icon: "godotengine" },
-	{ name: "Unreal Engine", icon: "unrealengine" },
-	{ name: "Linux", icon: "linux" },
-	{ name: "Blender", icon: "blender" },
-	{ name: "Photoshop", icon: "adobephotoshop" },
-	{ name: "Premiere Pro", icon: "adobepremierepro" },
-	{ name: "After Effects", icon: "adobeaftereffects" },
-	{ name: "Procreate", icon: "procreate" },
-	{ name: "Audacity", icon: "audacity" },
-	{ name: "Ableton", icon: "ableton" },
-	{ name: "FL Studio", icon: "flstudio" },
-];
+import coverImage from "./src/assets/mtns.png";
 ---
 
 <BaseLayout title="bigfum // home">
 	<div class="home" transition:animate="none">
 		<section class="section profile-section">
-			<!-- <Image src={me} alt="me" class="profile-headshot" /> -->
-
-			<div class="profile-text">
-				<p class="eyebrow">profile</p>
-				<h2>
-					hi, i'm x, a <mark class="hl">full stack creative</mark>.
-				</h2>
-				<p class="lede">i'm currently a senior CS student.</p>
-			</div>
-		</section>
-
-		<section class="section experience-section">
-			<p class="eyebrow">experience</p>
-			<div class="exp-list">
-				<div class="exp-item">
-					<div class="exp-head">
-						<span class="exp-role">title</span>
-						<span class="exp-date">year — year</span>
-					</div>
-					<p class="exp-org">subtitle</p>
-					<p class="exp-desc">description</p>
-				</div>
-			</div>
-		</section>
-
-		<section class="section stack-section">
-			<p class="eyebrow">stack</p>
-			<div class="stack-row">
-				{
-					stack.map((tool) => (
-						<span class="chip">
-							<img
-								src={`https://cdn.simpleicons.org/${tool.icon}`}
-								alt=""
-								loading="lazy"
-								onerror="this.remove()"
-							/>
-							{tool.name}
-						</span>
-					))
-				}
-			</div>
-		</section>
-
-		<section class="section cta-section">
-			<p class="eyebrow">contact</p>
-			<p class="lede">...</p>
-			<div class="cta-row">
-				<a class="submit-btn" href="/contact">get in touch</a>
+			<div class="cover-wrap">
+				<Image src={coverImage} alt="" />
 			</div>
 		</section>
 	</div>
+</BaseLayout>
 
-	<script>
-		function initReveals() {
-			const sections = document.querySelectorAll(".home .section");
-			const reduceMotion = window.matchMedia(
-				"(prefers-reduced-motion: reduce)",
-			).matches;
+<script>
+	function initReveals() {
+		const sections = document.querySelectorAll(".home .section");
+		const reduceMotion = window.matchMedia(
+			"(prefers-reduced-motion: reduce)",
+		).matches;
 
-			if (reduceMotion) {
-				sections.forEach((el) => el.classList.add("is-visible"));
-				return;
-			}
-
-			sections.forEach((el) => el.classList.remove("is-visible"));
-
-			const observer = new IntersectionObserver(
-				(entries) => {
-					entries.forEach((entry) => {
-						if (entry.isIntersecting) {
-							entry.target.classList.add("is-visible");
-							observer.unobserve(entry.target);
-						}
-					});
-				},
-				{ threshold: 0.15, rootMargin: "0px 0px -10% 0px" },
-			);
-
-			sections.forEach((el) => observer.observe(el));
+		if (reduceMotion) {
+			sections.forEach((el) => el.classList.add("is-visible"));
+			return;
 		}
 
-		initReveals();
-		document.addEventListener("astro:after-swap", initReveals);
-	</script>
-</BaseLayout>
+		sections.forEach((el) => el.classList.remove("is-visible"));
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						entry.target.classList.add("is-visible");
+						observer.unobserve(entry.target);
+					}
+				});
+			},
+			{ threshold: 0.15, rootMargin: "0px 0px -10% 0px" },
+		);
+
+		sections.forEach((el) => observer.observe(el));
+	}
+
+	initReveals();
+	document.addEventListener("astro:after-swap", initReveals);
+</script>

@@ -9,25 +9,20 @@ const items = [
         tags: ["Canvas", "Dithering"],
         href: "#",
     },
+    {
+        title: "do a doodle",
+        type: "code",
+        summary: "pixel",
+        tags: ["Canvas", "Dithering"],
+        href: "#",
+    },
 ];
 ---
 
 <BaseLayout title="bigfum // toys">
     <div class="home" transition:animate="none">
         <div class="listing">
-            <section class="section listing-header">
-                <p class="eyebrow">toys</p>
-                <h2>the small things</h2>
-                <p class="lede">code experiments and 2D/3D art</p>
-                <div class="filter-row" role="group" aria-label="Filter toys">
-                    <button class="filter-btn is-active" data-filter="all"
-                        >all</button
-                    >
-                    <button class="filter-btn" data-filter="code">code</button>
-                    <button class="filter-btn" data-filter="art">art</button>
-                </div>
-            </section>
-
+            <span style="display: block; margin-bottom: 1.5em;"></span>
             <section class="section card-grid-section">
                 <div class="card-grid" id="toys-grid">
                     {

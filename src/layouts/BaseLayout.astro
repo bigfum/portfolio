@@ -136,13 +136,13 @@ const pathname = Astro.url.pathname;
                         Astro.url.pathname === "/" && "active",
                     ]}>home</a
                 >
-                <a
+                <!-- <a
                     href="/projects"
                     class:list={[
                         "nav-link",
                         Astro.url.pathname.startsWith("/projects") && "active",
                     ]}>projects</a
-                >
+                > -->
                 <a
                     href="/toys"
                     class:list={[
@@ -203,7 +203,7 @@ const pathname = Astro.url.pathname;
 
         <main>
             <div class="content-wrapper">
-                <span style="display: block; margin-bottom: 1.625em;"></span>
+                <!-- <span style="display: block; margin-bottom: 1.625em;"></span> -->
                 <slot />
             </div>
         </main>
