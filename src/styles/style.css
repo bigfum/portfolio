@@ -73,7 +73,7 @@ main {
     left: 0;
     width: 450px;
     height: 100vh;
-    padding: 6rem 0rem 0rem 6rem;
+    padding: 6rem 0rem 6rem 6rem;
 }
 
 .nav-links {
@@ -120,6 +120,17 @@ main {
     right: -4px;
     background: #f2ff00;
     z-index: -1;
+}
+
+.profile-details {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    bottom: 35px;
+    position: relative;
+    text-transform: uppercase;
+    font-family: 'Eurostile MN', sans-serif;
+    font-size: 0.75rem;
 }
 
 /* ==========================================================================
@@ -655,6 +666,10 @@ body {
     object-fit: cover;
     object-position: 90% center;
     image-rendering: pixelated;
+    -webkit-user-select: none;
+    user-select: none;
+    -ms-user-select: none;
+    pointer-events: none;
 }
 
 @media (max-width: 1024px) {
