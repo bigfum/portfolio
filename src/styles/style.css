@@ -236,6 +236,7 @@ h1 {
     font-size: 3rem;
     -webkit-user-select: none;
     user-select: none;
+    -ms-user-select: none;
 }
 
 h2 {
@@ -245,6 +246,7 @@ h2 {
     font-size: 2.5rem;
     -webkit-user-select: none;
     user-select: none;
+    -ms-user-select: none;
 }
 
 body {
@@ -257,6 +259,7 @@ body {
     font-size: 1.75rem;
     -webkit-user-select: none;
     user-select: none;
+    -ms-user-select: none;
     transition: background-color 0.3s ease, color 0.3s ease;
     display: grid;
     grid-template-columns: 450px 1fr;
@@ -373,6 +376,7 @@ body {
     border: none;
     cursor: pointer;
     padding: 0;
+    touch-action: manipulation;
 }
 
 .hamburger-btn span {
