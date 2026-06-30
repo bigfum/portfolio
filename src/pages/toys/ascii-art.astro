@@ -1,0 +1,1037 @@
+---
+import { ClientRouter } from "astro:transitions";
+import "../../styles/style.css";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>bigfum // ascii art</title>
+    <ClientRouter />
+    <script is:inline>
+      const theme = (() => {
+        if (
+          typeof localStorage !== "undefined" &&
+          localStorage.getItem("theme")
+        )
+          return localStorage.getItem("theme");
+        return "dark";
+      })();
+      document.documentElement.setAttribute("data-theme", theme);
+    </script>
+  </head>
+  <body>
+    <!-- blur behind back button, matches main layout -->
+    <div class="top-bar-blur">
+      <span></span><span></span><span></span><span></span>
+    </div>
+
+    <a href="/toys" class="back-btn">← toys</a>
+
+    <div class="widget-container">
+      <span style="display: block; margin-bottom: .5em;"></span>
+      <p class="widget-title">ascii art</p>
+
+      <div class="panels">
+        <div class="panel">
+          <div class="panel-header">
+            <label class="hdr-btn" for="file">upload</label>
+            <input
+              type="file"
+              id="file"
+              accept="image/*"
+              style="display:none"
+            />
+            <span id="image-name"></span>
+            <span id="image-res"></span>
+          </div>
+          <label class="panel-body source-body" id="drop" for="file">
+            <img id="preview" alt="" />
+            <div class="empty-state" id="empty-state">
+              drop an image<br />or paste from clipboard
+            </div>
+          </label>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <button id="copy-visual" class="hdr-btn">copy text</button>
+            <button id="copy-raw" class="hdr-btn">copy html</button>
+            <span class="hdr-gap"></span>
+            <span id="status"></span>
+            <span id="stats"></span>
+          </div>
+          <div class="panel-body output-body">
+            <pre id="output"></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- guide left / controls right, aligned to panels above -->
+      <div class="meta-row">
+        <p class="guide"></p>
+
+        <div id="controls">
+          <!-- row 1: dimensions left, invert + theme pushed to far right -->
+          <div class="ctrl-row">
+            <div class="ctrl-col">
+              <span class="ctrl-lbl">width</span>
+              <input
+                type="number"
+                id="width"
+                min="4"
+                max="400"
+                value="32"
+                class="num-input"
+              />
+            </div>
+            <button
+              id="aspect-lock"
+              class="chain-btn"
+              data-locked="true"
+              title="Lock aspect ratio"
+            >
+              <svg
+                class="icon-locked"
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                ></path>
+                <path
+                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                ></path>
+              </svg>
+              <svg
+                class="icon-unlocked"
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m18.84 12.25 1.72-1.71a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                ></path>
+                <path d="m5.17 11.75-1.71 1.71a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                ></path>
+                <line x1="8" x2="8" y1="2" y2="6"></line><line
+                  x1="2"
+                  x2="6"
+                  y1="8"
+                  y2="8"></line>
+                <line x1="16" x2="20" y1="18" y2="18"></line><line
+                  x1="18"
+                  x2="18"
+                  y1="16"
+                  y2="20"></line>
+              </svg>
+            </button>
+            <div class="ctrl-col">
+              <span class="ctrl-lbl">height</span>
+              <input
+                type="number"
+                id="height"
+                min="2"
+                max="200"
+                value="32"
+                class="num-input"
+              />
+            </div>
+            <div class="ctrl-col">
+              <span class="ctrl-lbl">square px</span>
+              <button id="square-pixels" class="ctrl-btn" data-on="false"
+                >off</button
+              >
+            </div>
+            <span class="ctrl-spacer"></span>
+            <div class="ctrl-col" id="invert-col">
+              <span class="ctrl-lbl">invert</span>
+              <button id="invert-btn" class="ctrl-btn" data-on="false"
+                >off</button
+              >
+            </div>
+            <div class="ctrl-col">
+              <span class="ctrl-lbl">theme</span>
+              <button id="widget-theme-toggle" class="ctrl-btn">dark</button>
+            </div>
+          </div>
+
+          <!-- row 2: render settings + posterize -->
+          <div class="ctrl-row">
+            <div class="ctrl-col">
+              <span class="ctrl-lbl">mode</span>
+              <select id="mode" class="ctrl-select" style="width:5.8rem">
+                <option value="luminance">luminance</option>
+                <option value="color">color</option>
+              </select>
+            </div>
+            <div class="ctrl-col">
+              <span class="ctrl-lbl">sampling</span>
+              <select id="method" class="ctrl-select" style="width:5.5rem">
+                <option value="area">area avg</option>
+                <option value="nearest">nearest</option>
+              </select>
+            </div>
+            <div class="ctrl-col" id="alpha-mode-col" style="display:none">
+              <span class="ctrl-lbl">alpha</span>
+              <select id="alpha-mode" class="ctrl-select" style="width:6rem">
+                <option value="char">char density</option>
+                <option value="css">css opacity</option>
+              </select>
+            </div>
+            <div class="ctrl-col">
+              <span class="ctrl-lbl">posterize</span>
+              <div class="range-wrap">
+                <input
+                  type="range"
+                  id="posterize"
+                  min="0"
+                  max="15"
+                  value="0"
+                  class="ctrl-range"
+                  style="width:80px"
+                />
+                <span id="posterize-val" class="range-readout">off</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style is:global>
+      body {
+        display: flex !important;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 100dvh;
+        width: 100%;
+        grid-template-columns: unset !important;
+      }
+    </style>
+
+    <style>
+      .back-btn {
+        position: fixed;
+        top: 1.5rem;
+        left: 1.5rem;
+        z-index: 1001;
+        font-family: "Eurostile MN", sans-serif;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-color);
+        text-decoration: none;
+        opacity: 0.45;
+        transition:
+          opacity 0.2s ease,
+          color 0.3s ease;
+      }
+      .back-btn:hover {
+        opacity: 1;
+      }
+
+      .widget-container {
+        max-width: 1400px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 3.5rem 2rem 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .widget-title {
+        font-family: "Eurostile MN", sans-serif;
+        font-size: 0.7rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--text-color);
+        margin: 0 0 0.1rem;
+        opacity: 0.75;
+        user-select: none;
+        transition: color 0.3s ease;
+      }
+
+      /* ── panels ───────────────────────────────── */
+      .panels {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      .panel {
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        aspect-ratio: 1 / 1;
+        min-width: 0;
+        transition: border-color 0.3s ease;
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 0.65rem;
+        border-bottom: 1px solid var(--border-color);
+        background-color: color-mix(
+          in srgb,
+          var(--border-color) 40%,
+          transparent
+        );
+
+        flex-shrink: 0;
+        min-width: 0;
+        transition:
+          border-color 0.3s ease,
+          background-color 0.3s ease;
+      }
+
+      .hdr-btn {
+        font-family: "Eurostile", sans-serif;
+        font-weight: 900;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+        background-color: var(--bg-color);
+        padding: 0 0.55rem;
+        height: var(--ctrl-h);
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+        user-select: none;
+        box-sizing: border-box;
+        transition:
+          border-color 0.3s ease,
+          background-color 0.3s ease,
+          color 0.3s ease;
+      }
+      .hdr-btn:hover {
+        border-color: var(--accent-color);
+      }
+
+      #image-name {
+        font-family: "Eurostile", sans-serif;
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-color);
+        opacity: 0.75;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+        flex: 1;
+        transition: color 0.3s ease;
+      }
+      #image-res {
+        font-family: "Eurostile", sans-serif;
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-color);
+        opacity: 0.75;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: color 0.3s ease;
+      }
+
+      .hdr-gap {
+        flex: 1;
+        min-width: 0.25rem;
+      }
+
+      #status,
+      #stats {
+        font-family: "Eurostile", sans-serif;
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-color);
+        opacity: 0.75;
+        white-space: nowrap;
+        transition: color 0.3s ease;
+      }
+      #stats {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+      }
+
+      .panel-body {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        overflow: hidden;
+        display: block;
+      }
+
+      .source-body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+      .source-body.over {
+        outline: 1px dashed var(--accent-color);
+        outline-offset: -6px;
+      }
+
+      #preview {
+        display: none;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        pointer-events: none;
+      }
+
+      .empty-state {
+        font-family: "Eurostile", sans-serif;
+        font-size: 1rem;
+        letter-spacing: 0.1em;
+        color: var(--text-color);
+        opacity: 0.3;
+        text-align: center;
+        line-height: 1;
+        user-select: none;
+        pointer-events: none;
+        transition: color 0.3s ease;
+      }
+
+      .output-body {
+        overflow: hidden;
+      }
+
+      #output {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-family: monospace;
+        font-size: 12px;
+        line-height: 1;
+        white-space: pre;
+        margin: 0;
+        padding: 0;
+        user-select: text;
+        -webkit-user-select: text;
+        will-change: transform;
+      }
+
+      /* ── meta row: guide left, controls right ─── */
+      .meta-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        align-items: start;
+      }
+
+      .guide {
+        font-family: "Eurostile", sans-serif;
+        font-size: 1rem;
+        letter-spacing: 0.07em;
+        color: var(--text-color);
+        opacity: 0.25;
+        margin: 0;
+        line-height: 1.5;
+        transition: color 0.3s ease;
+      }
+
+      /* ── controls ─────────────────────────────── */
+      #controls {
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+      }
+
+      .ctrl-row {
+        display: flex;
+        gap: 0.6rem;
+        align-items: flex-end;
+        flex-wrap: wrap;
+      }
+
+      .ctrl-spacer {
+        flex: 1;
+        min-width: 0.5rem;
+      }
+
+      .ctrl-col {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+
+      .ctrl-lbl {
+        font-family: "Eurostile", sans-serif;
+        font-weight: 900;
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-color);
+        opacity: 0.4;
+        white-space: nowrap;
+        user-select: none;
+        transition: color 0.3s ease;
+      }
+
+      .range-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        height: var(--ctrl-h);
+      }
+      .range-readout {
+        font-family: "Eurostile", sans-serif;
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-color);
+        opacity: 0.4;
+        white-space: nowrap;
+        min-width: 3rem;
+        transition: color 0.3s ease;
+      }
+
+      .num-input {
+        background: var(--bg-color);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+        padding: 0 0.4rem;
+        font-family: "Eurostile", sans-serif;
+        font-weight: 900;
+        font-size: 0.68rem;
+        letter-spacing: 0.05em;
+        width: 4.2rem;
+        height: var(--ctrl-h);
+        text-align: right;
+        border-radius: 0;
+        box-sizing: border-box;
+        -moz-appearance: textfield;
+        transition:
+          border-color 0.3s ease,
+          background-color 0.3s ease,
+          color 0.3s ease;
+        cursor: ew-resize;
+      }
+      .num-input::-webkit-inner-spin-button,
+      .num-input::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+      }
+      .num-input:hover {
+        border-color: var(--accent-color);
+      }
+      .num-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        cursor: text;
+      }
+
+      .chain-btn {
+        height: var(--ctrl-h);
+        width: var(--ctrl-h);
+        box-sizing: border-box;
+        background: none;
+        border: 1px solid var(--border-color);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-color);
+        opacity: 0.4;
+        flex-shrink: 0;
+        align-self: flex-end;
+        transition:
+          opacity 0.2s ease,
+          color 0.2s ease,
+          border-color 0.2s ease;
+      }
+      .chain-btn:hover {
+        opacity: 0.8;
+        border-color: var(--accent-color);
+      }
+      .chain-btn[data-locked="true"] {
+        opacity: 1;
+        color: var(--accent-color);
+        border-color: var(--accent-color);
+      }
+      .chain-btn .icon-locked {
+        display: none;
+      }
+      .chain-btn .icon-unlocked {
+        display: block;
+      }
+      .chain-btn[data-locked="true"] .icon-locked {
+        display: block;
+      }
+      .chain-btn[data-locked="true"] .icon-unlocked {
+        display: none;
+      }
+
+      @media (max-width: 1024px) {
+        .panels {
+          grid-template-columns: 1fr;
+        }
+        .meta-row {
+          grid-template-columns: 1fr;
+        }
+        .widget-container {
+          padding: 4rem 1rem 1.5rem;
+          gap: 0.6rem;
+        }
+        .guide {
+          order: 2;
+        }
+        #controls {
+          order: 1;
+        }
+        .ctrl-spacer {
+          display: none;
+        }
+      }
+    </style>
+
+    <script>
+      import { imageToBlockArt } from "ascii-art-widget";
+
+      let pasteHandler: ((e: Event) => void) | null = null;
+
+      function init() {
+        const themeToggleBtn = document.getElementById(
+          "widget-theme-toggle",
+        ) as HTMLButtonElement | null;
+        if (!themeToggleBtn) return;
+
+        if (pasteHandler) document.removeEventListener("paste", pasteHandler);
+
+        const { SQUARE_SCALE, CHAR_RATIO } = (() => {
+          const el = document.createElement("pre");
+          el.style.cssText =
+            "position:fixed;top:-9999px;visibility:hidden;font-family:monospace;font-size:12px;line-height:1;white-space:pre";
+          el.textContent = "█".repeat(100);
+          document.body.appendChild(el);
+          const charW = el.getBoundingClientRect().width / 100;
+          document.body.removeChild(el);
+          const sq = charW > 0 ? 12 / charW : 1.667;
+          return { SQUARE_SCALE: sq, CHAR_RATIO: 1 / sq };
+        })();
+
+        // state
+        const W_MIN = 4,
+          W_MAX = 400,
+          H_MIN = 2,
+          H_MAX = 200;
+        let lastSource: File | Blob | null = null;
+        let lastRaw = "";
+        let renderToken = 0;
+        let lastObjectUrl = "";
+        let squarePixels = false;
+        let invertMode = false;
+        let aspectLocked = true;
+        let imageAspectRatio = 0;
+
+        // DOM refs
+        const modeEl = document.getElementById("mode") as HTMLSelectElement;
+        const methodEl = document.getElementById("method") as HTMLSelectElement;
+        const alphaModeEl = document.getElementById(
+          "alpha-mode",
+        ) as HTMLSelectElement;
+        const alphaModeCol = document.getElementById(
+          "alpha-mode-col",
+        ) as HTMLElement;
+        const invertCol = document.getElementById("invert-col") as HTMLElement;
+        const posterizeEl = document.getElementById(
+          "posterize",
+        ) as HTMLInputElement;
+        const posterizeValEl = document.getElementById("posterize-val")!;
+        const widthEl = document.getElementById("width") as HTMLInputElement;
+        const heightEl = document.getElementById("height") as HTMLInputElement;
+        const output = document.getElementById("output")!;
+        const outputBody = document.querySelector(
+          ".output-body",
+        ) as HTMLElement;
+        const statsEl = document.getElementById("stats")!;
+        const statusEl = document.getElementById("status")!;
+        const previewEl = document.getElementById(
+          "preview",
+        ) as HTMLImageElement;
+        const emptyStateEl = document.getElementById("empty-state")!;
+        const imageNameEl = document.getElementById("image-name")!;
+        const imageResEl = document.getElementById("image-res")!;
+        const squarePxBtn = document.getElementById(
+          "square-pixels",
+        ) as HTMLButtonElement;
+        const invertBtn = document.getElementById(
+          "invert-btn",
+        ) as HTMLButtonElement;
+        const aspectLockBtn = document.getElementById(
+          "aspect-lock",
+        ) as HTMLButtonElement;
+        const fileEl = document.getElementById("file") as HTMLInputElement;
+        const drop = document.getElementById("drop")!;
+
+        // theme
+        function syncThemeBtn() {
+          const isDark = (localStorage.getItem("theme") ?? "dark") === "dark";
+          themeToggleBtn.textContent = isDark ? "dark" : "light";
+        }
+        syncThemeBtn();
+
+        themeToggleBtn.addEventListener("click", () => {
+          const isDark = (localStorage.getItem("theme") ?? "dark") === "dark";
+          const next = isDark ? "light" : "dark";
+          document.documentElement.setAttribute("data-theme", next);
+          localStorage.setItem("theme", next);
+          syncThemeBtn();
+        });
+
+        // helpers
+        function debounce(fn: (...a: unknown[]) => void, ms: number) {
+          let t: ReturnType<typeof setTimeout>;
+          return (...a: unknown[]) => {
+            clearTimeout(t);
+            t = setTimeout(() => fn(...a), ms);
+          };
+        }
+        function clamp(v: number, lo: number, hi: number) {
+          return Math.max(lo, Math.min(hi, v));
+        }
+        function effectiveRatio() {
+          return squarePixels
+            ? imageAspectRatio
+            : imageAspectRatio * SQUARE_SCALE;
+        }
+        function posterizeLevels() {
+          const v = Number(posterizeEl.value);
+          return v === 0 ? 0 : 17 - v;
+        }
+        function fmt(n: number) {
+          return n.toLocaleString();
+        }
+        function fmtK(n: number) {
+          return n >= 1000 ? `~${Math.round(n / 100) / 10}k` : `~${fmt(n)}`;
+        }
+
+        function renderStats(stats: Record<string, number>, mode: string) {
+          if (mode === "color") {
+            const unoptimized =
+              stats.cells *
+              `<span style="color:rgb(255,255,255)">█</span>`.length;
+            const saved = unoptimized - stats.rawChars;
+            const pct = Math.round((saved / unoptimized) * 100);
+            statsEl.innerHTML = `${fmt(stats.plainChars)} plain · ${fmt(stats.rawChars)} raw · <span style="color:var(--accent-color);opacity:1">${fmtK(saved)} saved (${pct}%)</span>`;
+          } else {
+            statsEl.textContent = `${fmt(stats.plainChars)} chars`;
+          }
+        }
+
+        // scaling
+        function measureCharWidth(fontSize: number): number {
+          const el = document.createElement("pre");
+          el.style.cssText = `position:fixed;top:-9999px;visibility:hidden;font-family:monospace;font-size:${fontSize}px;line-height:1;white-space:pre`;
+          el.textContent = "█".repeat(20);
+          document.body.appendChild(el);
+          const w = el.getBoundingClientRect().width / 20;
+          document.body.removeChild(el);
+          return w > 0 ? w : fontSize * CHAR_RATIO;
+        }
+
+        function scaleOutput() {
+          if (!lastSource) return;
+          const numCols = Number(widthEl.value);
+          const numRows = Number(heightEl.value);
+          if (!numCols || !numRows) return;
+          const availW = outputBody.clientWidth;
+          const availH = outputBody.clientHeight;
+          if (availW <= 0 || availH <= 0) return;
+          const fsForW = squarePixels
+            ? availW / numCols
+            : availW / (CHAR_RATIO * numCols);
+          const fsForH = availH / numRows;
+          const fontSize = Math.max(Math.floor(Math.min(fsForW, fsForH)), 2);
+          output.style.fontSize = fontSize + "px";
+          if (squarePixels) {
+            const exactScaleX = fontSize / measureCharWidth(fontSize);
+            output.style.transform = `translate(-50%, -50%) scaleX(${exactScaleX})`;
+          } else {
+            output.style.transform = "translate(-50%, -50%)";
+          }
+        }
+
+        new ResizeObserver(() => {
+          if (lastSource) scaleOutput();
+        }).observe(outputBody);
+
+        // image load
+        function autoSetDimensions() {
+          const ratio = effectiveRatio();
+          let cols = 80,
+            rows = Math.round(cols / ratio);
+          if (rows > H_MAX) {
+            rows = H_MAX;
+            cols = Math.round(rows * ratio);
+          }
+          if (rows < H_MIN) {
+            rows = H_MIN;
+            cols = Math.round(rows * ratio);
+          }
+          widthEl.value = String(clamp(cols, W_MIN, W_MAX));
+          heightEl.value = String(clamp(rows, H_MIN, H_MAX));
+        }
+
+        function loadPreview(source: File | Blob) {
+          if (lastObjectUrl) URL.revokeObjectURL(lastObjectUrl);
+          lastObjectUrl = URL.createObjectURL(source);
+          previewEl.onload = () => {
+            imageAspectRatio = previewEl.naturalWidth / previewEl.naturalHeight;
+            autoSetDimensions();
+            const name =
+              source instanceof File
+                ? source.name.replace(/\.[^.]+$/, "")
+                : "image";
+            imageNameEl.textContent = name;
+            imageResEl.textContent = `${previewEl.naturalWidth} × ${previewEl.naturalHeight}`;
+            rerender();
+          };
+          previewEl.src = lastObjectUrl;
+          previewEl.style.display = "block";
+          emptyStateEl.style.display = "none";
+        }
+
+        function setSource(s: File | Blob) {
+          lastSource = s;
+          loadPreview(s);
+        }
+
+        // aspect lock
+        function applyAspectToHeight() {
+          if (!aspectLocked || !imageAspectRatio) return;
+          heightEl.value = String(
+            clamp(
+              Math.round(Number(widthEl.value) / effectiveRatio()),
+              H_MIN,
+              H_MAX,
+            ),
+          );
+        }
+        function applyAspectToWidth() {
+          if (!aspectLocked || !imageAspectRatio) return;
+          widthEl.value = String(
+            clamp(
+              Math.round(Number(heightEl.value) * effectiveRatio()),
+              W_MIN,
+              W_MAX,
+            ),
+          );
+        }
+
+        // render
+        async function rerender() {
+          if (!lastSource) return;
+          const token = ++renderToken;
+          statusEl.textContent = "rendering…";
+          statsEl.textContent = "";
+          const mode = modeEl.value;
+          const { result, stats } = await imageToBlockArt(lastSource, {
+            width: Number(widthEl.value),
+            height: Number(heightEl.value),
+            method: methodEl.value as "area" | "nearest",
+            mode: mode as "luminance" | "color",
+            alphaMode: alphaModeEl.value as "char" | "css",
+            posterize: posterizeLevels(),
+            halfBlocks: false,
+            invert: mode === "luminance" ? invertMode : false,
+          });
+          if (token !== renderToken) return;
+          lastRaw = result;
+          if (mode === "color") output.innerHTML = result;
+          else output.textContent = result;
+          renderStats(stats as Record<string, number>, mode);
+          statusEl.textContent = "";
+          scaleOutput();
+        }
+
+        const debouncedRerender = debounce(rerender, 120);
+
+        // copy
+        function flashCopy(btn: HTMLButtonElement, getText: () => string) {
+          const orig = btn.textContent!;
+          const rect = btn.getBoundingClientRect();
+          btn.style.width = rect.width + "px";
+          btn.style.height = rect.height + "px";
+          navigator.clipboard.writeText(getText()).catch(() => {});
+          btn.textContent = "✓ copied";
+          btn.style.background = "var(--accent-color)";
+          btn.style.color = "white";
+          btn.style.borderColor = "var(--accent-color)";
+          setTimeout(() => {
+            btn.textContent = orig;
+            btn.style.width = btn.style.height = "";
+            btn.style.background = btn.style.color = btn.style.borderColor = "";
+          }, 1500);
+        }
+
+        document
+          .getElementById("copy-visual")!
+          .addEventListener("click", (e) =>
+            flashCopy(
+              e.currentTarget as HTMLButtonElement,
+              () => output.innerText,
+            ),
+          );
+        document
+          .getElementById("copy-raw")!
+          .addEventListener("click", (e) =>
+            flashCopy(e.currentTarget as HTMLButtonElement, () => lastRaw),
+          );
+
+        // scrub inputs
+        function setupScrubInput(input: HTMLInputElement) {
+          input.addEventListener("mousedown", (e: MouseEvent) => {
+            if (e.button !== 0) return;
+            const startX = e.clientX,
+              startVal = Number(input.value);
+            let dragging = false;
+            const onMove = (e: MouseEvent) => {
+              const dx = e.clientX - startX;
+              if (!dragging && Math.abs(dx) < 4) return;
+              if (!dragging) {
+                dragging = true;
+                input.blur();
+                document.body.style.cursor = "ew-resize";
+                document.body.style.userSelect = "none";
+              }
+              const speed = e.shiftKey ? 0.1 : 1;
+              const v = clamp(
+                Math.round(startVal + dx * speed),
+                Number(input.min),
+                Number(input.max),
+              );
+              if (Number(input.value) !== v) {
+                input.value = String(v);
+                input.dispatchEvent(new Event("input"));
+              }
+            };
+            const onUp = () => {
+              window.removeEventListener("mousemove", onMove);
+              window.removeEventListener("mouseup", onUp);
+              document.body.style.cursor = document.body.style.userSelect = "";
+              if (!dragging) {
+                input.focus();
+                input.select();
+              }
+            };
+            e.preventDefault();
+            window.addEventListener("mousemove", onMove);
+            window.addEventListener("mouseup", onUp);
+          });
+        }
+
+        setupScrubInput(widthEl);
+        setupScrubInput(heightEl);
+
+        // control events
+        widthEl.addEventListener("input", () => {
+          applyAspectToHeight();
+          debouncedRerender();
+        });
+        heightEl.addEventListener("input", () => {
+          applyAspectToWidth();
+          debouncedRerender();
+        });
+
+        posterizeEl.addEventListener("input", () => {
+          const v = Number(posterizeEl.value);
+          posterizeValEl.textContent = v === 0 ? "off" : `${17 - v} lvl`;
+          debouncedRerender();
+        });
+
+        modeEl.addEventListener("change", () => {
+          const isColor = modeEl.value === "color";
+          alphaModeCol.style.display = isColor ? "" : "none";
+          invertCol.style.display = isColor ? "none" : "";
+          rerender();
+        });
+        methodEl.addEventListener("change", () => rerender());
+        alphaModeEl.addEventListener("change", () => rerender());
+
+        squarePxBtn.addEventListener("click", () => {
+          squarePixels = !squarePixels;
+          squarePxBtn.dataset.on = String(squarePixels);
+          squarePxBtn.textContent = squarePixels ? "on" : "off";
+          if (aspectLocked && imageAspectRatio) {
+            applyAspectToHeight();
+            rerender();
+          } else scaleOutput();
+        });
+
+        invertBtn.addEventListener("click", () => {
+          invertMode = !invertMode;
+          invertBtn.dataset.on = String(invertMode);
+          invertBtn.textContent = invertMode ? "on" : "off";
+          rerender();
+        });
+
+        aspectLockBtn.addEventListener("click", () => {
+          aspectLocked = !aspectLocked;
+          aspectLockBtn.dataset.locked = String(aspectLocked);
+          if (aspectLocked && imageAspectRatio) {
+            applyAspectToHeight();
+            debouncedRerender();
+          }
+        });
+
+        // file / drop / paste
+        fileEl.addEventListener("change", (e) => {
+          const f = (e.target as HTMLInputElement).files?.[0];
+          if (f) setSource(f);
+        });
+
+        drop.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          drop.classList.add("over");
+        });
+        drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+        drop.addEventListener("drop", (e) => {
+          e.preventDefault();
+          drop.classList.remove("over");
+          const f = (e as DragEvent).dataTransfer?.files?.[0];
+          if (f) setSource(f);
+        });
+
+        pasteHandler = (e: Event) => {
+          const ce = e as ClipboardEvent;
+          const item = [...(ce.clipboardData?.items ?? [])].find((i) =>
+            i.type.startsWith("image/"),
+          );
+          if (item) {
+            const blob = item.getAsFile();
+            if (blob) setSource(blob);
+          }
+        };
+        document.addEventListener("paste", pasteHandler);
+      }
+
+      document.addEventListener("astro:page-load", init);
+    </script>
+  </body>
+</html>

@@ -801,3 +801,102 @@ body {
     transition: background-color 0.2s ease, color 0.2s ease,
         border-color 0.2s ease;
 }
+
+/* ==========================================================================
+   WIDGET CONTROLS (shared by toys / interactive pages)
+   ========================================================================== */
+
+:root {
+    --ctrl-h: 1.65rem;
+}
+
+.ctrl-btn {
+    font-family: 'Eurostile', sans-serif;
+    font-weight: 900;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    background: none;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 0 0.55rem;
+    cursor: pointer;
+    height: var(--ctrl-h);
+    box-sizing: border-box;
+    text-align: center;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    user-select: none;
+    border-radius: 0;
+}
+
+.ctrl-btn:hover {
+    border-color: var(--accent-color);
+}
+
+.ctrl-btn[data-on="true"] {
+    background: var(--text-color);
+    color: var(--bg-color);
+    border-color: var(--text-color);
+}
+
+.ctrl-select {
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 0 0.5rem;
+    font-family: 'Eurostile', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 0;
+    cursor: pointer;
+    height: var(--ctrl-h);
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+.ctrl-select:hover {
+    border-color: var(--accent-color);
+}
+
+.ctrl-range {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 2px;
+    background: var(--border-color);
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    border-radius: 0;
+    transition: background-color 0.3s ease;
+}
+
+.ctrl-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 7px;
+    height: 14px;
+    background: var(--text-color);
+    border-radius: 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.ctrl-range::-webkit-slider-thumb:hover {
+    background: var(--accent-color);
+}
+
+.ctrl-range::-moz-range-thumb {
+    width: 7px;
+    height: 14px;
+    background: var(--text-color);
+    border-radius: 0;
+    border: none;
+    cursor: pointer;
+}
