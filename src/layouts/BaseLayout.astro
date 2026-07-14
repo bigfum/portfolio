@@ -9,9 +9,13 @@ const pathname = Astro.url.pathname;
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+        />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <title>{title}</title>
+        <meta name="theme-color" content="#0d0e15" />
         <ClientRouter />
 
         <script is:inline>
@@ -32,6 +36,16 @@ const pathname = Astro.url.pathname;
                 document.documentElement.setAttribute("data-theme", "dark");
             } else {
                 document.documentElement.setAttribute("data-theme", "light");
+            }
+
+            const themeColorMeta = document.querySelector(
+                'meta[name="theme-color"]',
+            );
+            if (themeColorMeta) {
+                themeColorMeta.setAttribute(
+                    "content",
+                    theme === "dark" ? "#0d0e15" : "#ffffff",
+                );
             }
         </script>
     </head>
@@ -60,9 +74,32 @@ const pathname = Astro.url.pathname;
             </button>
 
             <script>
+                function setThemeColorMeta(theme) {
+                    const color = theme === "dark" ? "#0d0e15" : "#ffffff";
+                    const old = document.querySelector(
+                        'meta[name="theme-color"]',
+                    );
+                    // iOS Safari frequently ignores an in-place
+                    // setAttribute() on theme-color — swapping the whole
+                    // element out is what actually gets it to repaint the
+                    // status-bar / safe-area strip.
+                    if (old) old.remove();
+                    const fresh = document.createElement("meta");
+                    fresh.setAttribute("name", "theme-color");
+                    fresh.setAttribute("content", color);
+                    document.head.appendChild(fresh);
+
+                    // Extra nudge: force a compositing layer redraw too.
+                    document.body.style.transform = "translateZ(0)";
+                    requestAnimationFrame(() => {
+                        document.body.style.transform = "";
+                    });
+                }
+
                 function applyTheme() {
                     const theme = localStorage.getItem("theme") || "light";
                     document.documentElement.setAttribute("data-theme", theme);
+                    setThemeColorMeta(theme);
                 }
 
                 function setupThemeToggle() {
@@ -77,6 +114,7 @@ const pathname = Astro.url.pathname;
                             newTheme,
                         );
                         localStorage.setItem("theme", newTheme);
+                        setThemeColorMeta(newTheme);
                     };
 
                     const buttons = document.querySelectorAll(
@@ -118,14 +156,174 @@ const pathname = Astro.url.pathname;
                     }
                 }
 
+                function setupProfileSheet() {
+                    const el = document.getElementById("profile-details");
+                    if (!el) return;
+
+                    if (window.__profileSheetCleanup) {
+                        window.__profileSheetCleanup();
+                        window.__profileSheetCleanup = null;
+                    }
+
+                    document.body.classList.remove("gesture-locked");
+
+                    const isHome = window.location.pathname === "/";
+                    const isMobile = window.matchMedia(
+                        "(max-width: 1024px)",
+                    ).matches;
+
+                    if (!isHome || !isMobile) {
+                        el.classList.remove("profile-sheet-active");
+                        el.style.transform = "";
+                        el.style.opacity = "";
+                        return;
+                    }
+
+                    el.classList.add("profile-sheet-active");
+                    document.body.classList.add("gesture-locked");
+
+                    const reduceMotion = window.matchMedia(
+                        "(prefers-reduced-motion: reduce)",
+                    ).matches;
+
+                    if (reduceMotion) {
+                        el.style.transform = "translateY(0)";
+                        el.style.opacity = "1";
+                        return;
+                    }
+
+                    // The home image itself never scrolls on mobile — a
+                    // swipe/wheel gesture is captured directly and only
+                    // drives this card's reveal, nothing else moves.
+                    const revealDistance = 180;
+                    let progressPx = 0;
+                    let ticking = false;
+                    let touchStartY = null;
+                    let lastTouchY = null;
+                    let lastTouchTime = 0;
+                    let velocity = 0;
+                    let momentumFrame = null;
+
+                    const render = () => {
+                        const progress = Math.min(
+                            Math.max(progressPx / revealDistance, 0),
+                            1,
+                        );
+                        el.style.transform = `translateY(${(1 - progress) * 100}%)`;
+                        el.style.opacity = String(progress);
+                        ticking = false;
+                    };
+
+                    const queueRender = () => {
+                        if (!ticking) {
+                            requestAnimationFrame(render);
+                            ticking = true;
+                        }
+                    };
+
+                    const applyDelta = (deltaY) => {
+                        progressPx = Math.min(
+                            Math.max(progressPx + deltaY, 0),
+                            revealDistance,
+                        );
+                        queueRender();
+                    };
+
+                    const stopMomentum = () => {
+                        if (momentumFrame !== null) {
+                            cancelAnimationFrame(momentumFrame);
+                            momentumFrame = null;
+                        }
+                    };
+
+                    const runMomentum = () => {
+                        velocity *= 0.94;
+                        if (
+                            Math.abs(velocity) < 0.02 ||
+                            progressPx <= 0 ||
+                            progressPx >= revealDistance
+                        ) {
+                            momentumFrame = null;
+                            return;
+                        }
+                        applyDelta(velocity * 16);
+                        momentumFrame = requestAnimationFrame(runMomentum);
+                    };
+
+                    const onWheel = (e) => {
+                        e.preventDefault();
+                        stopMomentum();
+                        applyDelta(e.deltaY);
+                    };
+
+                    const onTouchStart = (e) => {
+                        stopMomentum();
+                        touchStartY = e.touches[0].clientY;
+                        lastTouchY = touchStartY;
+                        lastTouchTime = performance.now();
+                        velocity = 0;
+                    };
+
+                    const onTouchMove = (e) => {
+                        if (touchStartY === null) return;
+                        const currentY = e.touches[0].clientY;
+                        const now = performance.now();
+                        const deltaY = lastTouchY - currentY;
+                        const dt = Math.max(now - lastTouchTime, 1);
+                        velocity = velocity * 0.7 + (deltaY / dt) * 0.3;
+                        lastTouchY = currentY;
+                        lastTouchTime = now;
+                        e.preventDefault();
+                        applyDelta(deltaY);
+                    };
+
+                    const onTouchEnd = () => {
+                        touchStartY = null;
+                        if (Math.abs(velocity) > 0.05) {
+                            momentumFrame =
+                                requestAnimationFrame(runMomentum);
+                        }
+                    };
+
+                    render();
+                    window.addEventListener("wheel", onWheel, {
+                        passive: false,
+                    });
+                    window.addEventListener("touchstart", onTouchStart, {
+                        passive: true,
+                    });
+                    window.addEventListener("touchmove", onTouchMove, {
+                        passive: false,
+                    });
+                    window.addEventListener("touchend", onTouchEnd);
+
+                    window.__profileSheetCleanup = () => {
+                        stopMomentum();
+                        window.removeEventListener("wheel", onWheel);
+                        window.removeEventListener(
+                            "touchstart",
+                            onTouchStart,
+                        );
+                        window.removeEventListener("touchmove", onTouchMove);
+                        window.removeEventListener("touchend", onTouchEnd);
+                        document.body.classList.remove("gesture-locked");
+                    };
+                }
+
                 applyTheme();
                 setupThemeToggle();
                 setupHamburgerMenu();
+                setupProfileSheet();
+
+                window
+                    .matchMedia("(max-width: 1024px)")
+                    .addEventListener("change", setupProfileSheet);
 
                 document.addEventListener("astro:after-swap", () => {
                     applyTheme();
                     setupThemeToggle();
                     setupHamburgerMenu();
+                    setupProfileSheet();
                 });
             </script>
 
@@ -200,7 +398,18 @@ const pathname = Astro.url.pathname;
                     </svg>
                 </button>
             </div>
-            <!-- <div class="profile-details">fullstack creative</div> -->
+            <div class="profile-details" id="profile-details">
+                <div class="profile-info">
+                    <p class="profile-bio">full-stack creative.</p>
+                    <a
+                        class="profile-link"
+                        href="https://github.com/bigfum"
+                        target="_blank"
+                        rel="noopener noreferrer">github</a
+                    >
+                </div>
+                <div class="profile-avatar" aria-hidden="true"></div>
+            </div>
         </nav>
 
         <main>

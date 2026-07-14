@@ -13,7 +13,7 @@
     --bg-color: #ffffff;
     --text-color: #0d0e15;
     --accent-color: #9361ff;
-    --border-color: #e2e8f0;
+    --border-color: #d9d9d9;
     --form-bg: #ffffff;
 }
 
@@ -38,9 +38,19 @@ body {
     overscroll-behavior: none;
 }
 
+html {
+    background-color: var(--bg-color);
+    transition: background-color 0.3s ease;
+}
+
+body.gesture-locked {
+    overflow: hidden;
+    height: 100dvh;
+}
+
 main {
     grid-column: 2;
-    min-height: 100vh;
+    min-height: 100dvh;
     padding: 6rem 6rem;
     display: flex;
     justify-content: flex-start;
@@ -126,11 +136,63 @@ main {
     margin-top: auto;
     display: flex;
     flex-direction: column;
+    gap: 0.85rem;
     bottom: 35px;
     position: relative;
     text-transform: uppercase;
-    font-family: 'Eurostile MN', sans-serif;
-    font-size: 0.75rem;
+    font-family: 'Eurostile', sans-serif;
+    font-size: 1.0rem;
+}
+
+.profile-avatar {
+    order: -1;
+    width: 50%;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    border: 1px solid var(--border-color);
+    background-image: repeating-linear-gradient(45deg,
+            var(--border-color),
+            var(--border-color) 1px,
+            transparent 1px,
+            transparent 8px);
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.profile-bio {
+    margin: 0;
+    max-width: 220px;
+    opacity: 0.75;
+    line-height: 1.4;
+}
+
+.profile-link {
+    position: relative;
+    display: inline-block;
+    width: fit-content;
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.profile-link::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    transform: scaleX(0);
+    height: 1.5px;
+    bottom: -1px;
+    left: 0;
+    background-color: var(--text-color);
+    transform-origin: bottom left;
+    transition: transform 0.1s ease-in-out;
+}
+
+.profile-link:hover::after {
+    transform: scaleX(1);
 }
 
 /* ==========================================================================
@@ -155,6 +217,7 @@ main {
     padding: 0;
     opacity: 0.6;
     transition: opacity 0.2s ease;
+    touch-action: manipulation;
 }
 
 .theme-btn:hover {
@@ -266,7 +329,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Eurostile', sans-serif;
-    min-height: 100vh;
+    min-height: 100dvh;
     font-size: 1.75rem;
     -webkit-user-select: none;
     user-select: none;
@@ -509,6 +572,7 @@ body {
         transition: opacity 0.2s ease;
         z-index: 1001;
         pointer-events: auto;
+        touch-action: manipulation;
     }
 
     .theme-btn-mobile:hover {
@@ -558,6 +622,30 @@ body {
     main {
         grid-column: 1;
         padding: 3rem 1.25rem 2rem;
+    }
+
+    .profile-details {
+        display: none;
+    }
+
+    .profile-details.profile-sheet-active {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1.25rem;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin-top: 0;
+        z-index: 900;
+        padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
+        background: color-mix(in srgb, var(--bg-color) 92%, transparent);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid var(--border-color);
+        transform: translateY(100%);
+        opacity: 0;
     }
 }
 
@@ -646,6 +734,16 @@ body {
     .profile-section h2 {
         font-size: 2rem;
     }
+
+    .contact-page {
+        min-height: calc(100dvh - 8.5rem);
+        top: 50px;
+    }
+
+    .contact-form {
+        gap: 1rem;
+        margin-top: 1rem;
+    }
 }
 
 /* ========================================================================== 
@@ -723,7 +821,7 @@ body {
 
 .card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(400px, 100%), 1fr));
     gap: 1.75rem;
 }
 
