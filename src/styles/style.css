@@ -668,7 +668,7 @@ body {
         margin-top: 0;
         z-index: 900;
         padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
-        background: color-mix(in srgb, var(--bg-color) 92%, transparent);
+        background: color-mix(in srgb, var(--bg-color) 100%, transparent);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
         border-top: 1px solid var(--border-color);
