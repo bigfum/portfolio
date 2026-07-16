@@ -8,7 +8,12 @@ import coverImage from "../assets/mtns.png";
 	<div class="home" transition:animate="none">
 		<section class="section profile-section">
 			<div class="cover-wrap">
-				<Image src={coverImage} alt="" />
+				<Image
+					src={coverImage}
+					alt=""
+					loading="eager"
+					fetchpriority="high"
+				/>
 			</div>
 		</section>
 	</div>

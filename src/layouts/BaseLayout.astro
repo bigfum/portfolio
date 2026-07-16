@@ -1,7 +1,10 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import "../styles/style.css";
-const { title } = Astro.props;
+const {
+    title,
+    description = "bigfum — full-stack creative building interactive, visual, and slightly unhinged things on the web.",
+} = Astro.props;
 const pathname = Astro.url.pathname;
 ---
 
@@ -15,7 +18,25 @@ const pathname = Astro.url.pathname;
         />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <title>{title}</title>
+        <meta name="description" content={description} />
         <meta name="theme-color" content="#0d0e15" />
+
+        <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin />
+        <link
+            rel="preload"
+            as="font"
+            type="font/woff"
+            href="https://fonts.cdnfonts.com/s/70817/Eurostile%20MN%20Extended%20Bold.woff"
+            crossorigin
+        />
+        <link
+            rel="preload"
+            as="font"
+            type="font/woff"
+            href="https://fonts.cdnfonts.com/s/13662/eurostile.woff"
+            crossorigin
+        />
+
         <ClientRouter />
 
         <script is:inline>
