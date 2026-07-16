@@ -154,7 +154,7 @@ main {
             var(--border-color) 1px,
             transparent 1px,
             transparent 8px); */
-    background-image: url('src/assets/itsme.png');
+    background-image: url('../assets/itsme.png');
     background-size: cover;
     background-position: center;
     image-rendering: pixelated;
