@@ -7,7 +7,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('https://fonts.cdnfonts.com/s/70817/Eurostile MN Extended Bold.woff') format('woff');
+    src: url('/fonts/eurostile-mn.woff2') format('woff2');
 }
 
 @font-face {
@@ -15,7 +15,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('https://fonts.cdnfonts.com/s/13662/eurostile.woff') format('woff');
+    src: url('/fonts/eurostile.woff2') format('woff2');
 }
 
 /* ==========================================================================

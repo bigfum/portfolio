@@ -21,19 +21,18 @@ const pathname = Astro.url.pathname;
         <meta name="description" content={description} />
         <meta name="theme-color" content="#0d0e15" />
 
-        <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin />
         <link
             rel="preload"
             as="font"
-            type="font/woff"
-            href="https://fonts.cdnfonts.com/s/70817/Eurostile%20MN%20Extended%20Bold.woff"
+            type="font/woff2"
+            href="/fonts/eurostile-mn.woff2"
             crossorigin
         />
         <link
             rel="preload"
             as="font"
-            type="font/woff"
-            href="https://fonts.cdnfonts.com/s/13662/eurostile.woff"
+            type="font/woff2"
+            href="/fonts/eurostile.woff2"
             crossorigin
         />
 
@@ -101,7 +100,9 @@ const pathname = Astro.url.pathname;
             </button>
 
             <script>
-                function setThemeColorMeta(theme) {
+                let profileSheetCleanup: (() => void) | null = null;
+
+                function setThemeColorMeta(theme: string) {
                     const color = theme === "dark" ? "#0d0e15" : "#ffffff";
                     const old = document.querySelector(
                         'meta[name="theme-color"]',
@@ -118,7 +119,7 @@ const pathname = Astro.url.pathname;
                     });
 
                     document
-                        .querySelectorAll(".safe-area-fill")
+                        .querySelectorAll<HTMLElement>(".safe-area-fill")
                         .forEach((el) => {
                             el.style.transition = "none";
                             el.style.transform = "scaleY(0)";
@@ -196,9 +197,9 @@ const pathname = Astro.url.pathname;
                     const el = document.getElementById("profile-details");
                     if (!el) return;
 
-                    if (window.__profileSheetCleanup) {
-                        window.__profileSheetCleanup();
-                        window.__profileSheetCleanup = null;
+                    if (profileSheetCleanup) {
+                        profileSheetCleanup();
+                        profileSheetCleanup = null;
                     }
 
                     document.body.classList.remove("gesture-locked");
@@ -231,11 +232,11 @@ const pathname = Astro.url.pathname;
                     const revealDistance = 180;
                     let progressPx = 0;
                     let ticking = false;
-                    let touchStartY = null;
-                    let lastTouchY = null;
+                    let touchStartY: number | null = null;
+                    let lastTouchY: number | null = null;
                     let lastTouchTime = 0;
                     let velocity = 0;
-                    let momentumFrame = null;
+                    let momentumFrame: number | null = null;
 
                     const render = () => {
                         const progress = Math.min(
@@ -254,7 +255,7 @@ const pathname = Astro.url.pathname;
                         }
                     };
 
-                    const applyDelta = (deltaY) => {
+                    const applyDelta = (deltaY: number) => {
                         progressPx = Math.min(
                             Math.max(progressPx + deltaY, 0),
                             revealDistance,
@@ -283,13 +284,13 @@ const pathname = Astro.url.pathname;
                         momentumFrame = requestAnimationFrame(runMomentum);
                     };
 
-                    const onWheel = (e) => {
+                    const onWheel = (e: WheelEvent) => {
                         e.preventDefault();
                         stopMomentum();
                         applyDelta(e.deltaY);
                     };
 
-                    const onTouchStart = (e) => {
+                    const onTouchStart = (e: TouchEvent) => {
                         stopMomentum();
                         touchStartY = e.touches[0].clientY;
                         lastTouchY = touchStartY;
@@ -297,11 +298,11 @@ const pathname = Astro.url.pathname;
                         velocity = 0;
                     };
 
-                    const onTouchMove = (e) => {
+                    const onTouchMove = (e: TouchEvent) => {
                         if (touchStartY === null) return;
                         const currentY = e.touches[0].clientY;
                         const now = performance.now();
-                        const deltaY = lastTouchY - currentY;
+                        const deltaY = (lastTouchY as number) - currentY;
                         const dt = Math.max(now - lastTouchTime, 1);
                         velocity = velocity * 0.7 + (deltaY / dt) * 0.3;
                         lastTouchY = currentY;
@@ -329,7 +330,7 @@ const pathname = Astro.url.pathname;
                     });
                     window.addEventListener("touchend", onTouchEnd);
 
-                    window.__profileSheetCleanup = () => {
+                    profileSheetCleanup = () => {
                         stopMomentum();
                         window.removeEventListener("wheel", onWheel);
                         window.removeEventListener("touchstart", onTouchStart);
