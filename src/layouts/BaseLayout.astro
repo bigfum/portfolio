@@ -50,6 +50,12 @@ const pathname = Astro.url.pathname;
         </script>
     </head>
     <body>
+        <div class="safe-area-fill safe-area-fill-top" aria-hidden="true">
+            <div class="safe-area-fill-inner"></div>
+        </div>
+        <div class="safe-area-fill safe-area-fill-bottom" aria-hidden="true">
+            <div class="safe-area-fill-inner"></div>
+        </div>
         <div class="top-bar-blur">
             <span></span>
             <span></span>
@@ -79,21 +85,30 @@ const pathname = Astro.url.pathname;
                     const old = document.querySelector(
                         'meta[name="theme-color"]',
                     );
-                    // iOS Safari frequently ignores an in-place
-                    // setAttribute() on theme-color — swapping the whole
-                    // element out is what actually gets it to repaint the
-                    // status-bar / safe-area strip.
                     if (old) old.remove();
                     const fresh = document.createElement("meta");
                     fresh.setAttribute("name", "theme-color");
                     fresh.setAttribute("content", color);
                     document.head.appendChild(fresh);
 
-                    // Extra nudge: force a compositing layer redraw too.
                     document.body.style.transform = "translateZ(0)";
                     requestAnimationFrame(() => {
                         document.body.style.transform = "";
                     });
+
+                    document
+                        .querySelectorAll(".safe-area-fill")
+                        .forEach((el) => {
+                            el.style.transition = "none";
+                            el.style.transform = "scaleY(0)";
+                            void el.offsetHeight;
+                            requestAnimationFrame(() => {
+                                el.style.transform = "scaleY(1)";
+                                requestAnimationFrame(() => {
+                                    el.style.transition = "";
+                                });
+                            });
+                        });
                 }
 
                 function applyTheme() {
@@ -192,9 +207,6 @@ const pathname = Astro.url.pathname;
                         return;
                     }
 
-                    // The home image itself never scrolls on mobile — a
-                    // swipe/wheel gesture is captured directly and only
-                    // drives this card's reveal, nothing else moves.
                     const revealDistance = 180;
                     let progressPx = 0;
                     let ticking = false;
@@ -280,8 +292,7 @@ const pathname = Astro.url.pathname;
                     const onTouchEnd = () => {
                         touchStartY = null;
                         if (Math.abs(velocity) > 0.05) {
-                            momentumFrame =
-                                requestAnimationFrame(runMomentum);
+                            momentumFrame = requestAnimationFrame(runMomentum);
                         }
                     };
 
@@ -300,10 +311,7 @@ const pathname = Astro.url.pathname;
                     window.__profileSheetCleanup = () => {
                         stopMomentum();
                         window.removeEventListener("wheel", onWheel);
-                        window.removeEventListener(
-                            "touchstart",
-                            onTouchStart,
-                        );
+                        window.removeEventListener("touchstart", onTouchStart);
                         window.removeEventListener("touchmove", onTouchMove);
                         window.removeEventListener("touchend", onTouchEnd);
                         document.body.classList.remove("gesture-locked");
@@ -342,13 +350,13 @@ const pathname = Astro.url.pathname;
                         Astro.url.pathname.startsWith("/projects") && "active",
                     ]}>projects</a
                 > -->
-                <a
+                <!-- <a
                     href="/toys"
                     class:list={[
                         "nav-link",
                         Astro.url.pathname.startsWith("/toys") && "active",
                     ]}>toys</a
-                >
+                > -->
                 <a
                     href="/contact"
                     class:list={[
@@ -400,13 +408,18 @@ const pathname = Astro.url.pathname;
             </div>
             <div class="profile-details" id="profile-details">
                 <div class="profile-info">
-                    <p class="profile-bio">full-stack creative.</p>
-                    <a
+                    <p class="profile-tagline">full-stack creative.</p>
+                    <p class="profile-bio">cs @ cu boulder</p>
+                    <p class="profile-bio">
+                        leading a rover team's software & always sweating the
+                        visual details
+                    </p>
+                    <!-- <a
                         class="profile-link"
-                        href="https://github.com/bigfum"
+                        href="https://website.com/"
                         target="_blank"
-                        rel="noopener noreferrer">github</a
-                    >
+                        rel="noopener noreferrer">link</a
+                    > -->
                 </div>
                 <div class="profile-avatar" aria-hidden="true"></div>
             </div>

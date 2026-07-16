@@ -135,26 +135,33 @@ main {
 .profile-details {
     margin-top: auto;
     display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1.25rem;
     bottom: 35px;
     position: relative;
-    text-transform: uppercase;
     font-family: 'Eurostile', sans-serif;
     font-size: 1.0rem;
 }
 
 .profile-avatar {
     order: -1;
-    width: 50%;
+    width: 33.333%;
     aspect-ratio: 1;
     flex-shrink: 0;
-    border: 1px solid var(--border-color);
-    background-image: repeating-linear-gradient(45deg,
+    /* background-image: repeating-linear-gradient(45deg,
             var(--border-color),
             var(--border-color) 1px,
             transparent 1px,
-            transparent 8px);
+            transparent 8px); */
+    background-image: url('src/assets/itsme.png');
+    background-size: cover;
+    background-position: center;
+    image-rendering: pixelated;
+}
+
+.profile-avatar {
+    image-rendering: pixelated;
 }
 
 .profile-info {
@@ -163,11 +170,18 @@ main {
     gap: 0.5rem;
 }
 
+.profile-tagline {
+    margin: 0;
+    font-weight: 900;
+    font-size: 1.7rem;
+    line-height: 1.0;
+}
+
 .profile-bio {
     margin: 0;
-    max-width: 220px;
+    font-size: 1.1rem;
     opacity: 0.75;
-    line-height: 1.4;
+    line-height: 1;
 }
 
 .profile-link {
@@ -176,6 +190,8 @@ main {
     width: fit-content;
     color: var(--text-color);
     text-decoration: none;
+    font-weight: 900;
+    transition: color 0.3s ease;
 }
 
 .profile-link::after {
@@ -184,7 +200,7 @@ main {
     width: 100%;
     transform: scaleX(0);
     height: 1.5px;
-    bottom: -1px;
+    bottom: 1px;
     left: 0;
     background-color: var(--text-color);
     transform-origin: bottom left;
@@ -236,8 +252,6 @@ main {
 [data-theme='dark'] .moon-icon {
     fill: var(--text-color);
 }
-
-/**/
 
 .moon-icon {
     fill: none;
@@ -363,6 +377,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    top: 80px;
 }
 
 .contact-page h2 {
@@ -631,7 +646,7 @@ body {
     .profile-details.profile-sheet-active {
         display: flex;
         flex-direction: row;
-        align-items: center;
+        align-items: flex-start;
         gap: 1.25rem;
         position: fixed;
         left: 0;
@@ -646,6 +661,7 @@ body {
         border-top: 1px solid var(--border-color);
         transform: translateY(100%);
         opacity: 0;
+        transition: background-color 0.3s ease, border-top 0.3s ease;
     }
 }
 
