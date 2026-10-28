@@ -10,13 +10,13 @@ const CONFIG = {
     CAMERA_PITCH: -0.25,
 
     // graph volume, relative to the camera's path
-    FAR: 50,
+    FAR: 30,
     X_MIN: -14,
     X_MAX: 6,
     Y_MIN: -15,
     Y_MAX: 5,
     CLEAR_RADIUS: 1.5,
-    STEP_Z: 0.1,
+    STEP_Z: 0.125,
 
     GROW_END: 28,
 
@@ -130,7 +130,7 @@ export function loadGraphScene(scene, camera) {
     const parentGen = new Uint32Array(NODE_COUNT * CONFIG.MAX_EDGES);
 
     const nodes = new THREE.InstancedMesh(
-        new THREE.SphereGeometry(CONFIG.NODE_RADIUS, 8, 6),
+        new THREE.SphereGeometry(CONFIG.NODE_RADIUS, 6, 4), // only a few px on screen
         nodeMaterial,
         NODE_COUNT,
     );
@@ -233,6 +233,7 @@ export function loadGraphScene(scene, camera) {
 
     let startTime = null;
     let lastTime = null;
+    let introDone = reduceMotion;
 
     function animate(time) {
         if (startTime === null) startTime = lastTime = time;
@@ -251,11 +252,14 @@ export function loadGraphScene(scene, camera) {
         const speed = CONFIG.SPEED_CRUISE
             + (CONFIG.SPEED_START - CONFIG.SPEED_CRUISE) * Math.exp(-elapsed / CONFIG.SPEED_DECAY);
         camera.position.z -= speed * dt;
+        if (speed < CONFIG.SPEED_CRUISE * 1.5) introDone = true;
 
         fillAhead();
         updateGraph();
     }
 
+    // full frame rate for the fast intro and theme fades, capped otherwise
+    animate.uncapped = () => !introDone || themeFade !== null;
     animate.dispose = () => themeObserver.disconnect();
     return animate;
 }

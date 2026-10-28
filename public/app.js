@@ -38,6 +38,11 @@ function loadSceneB(scene, camera) {
 // older scenes: loadSceneA, loadSceneB, initPathScene, loadSceneC
 const scenePickers = [loadGraphScene];
 
+const RENDER = {
+    PIXEL_RATIO: 0.7,
+    MAX_FPS: 45,
+};
+
 async function initEngine(canvas) {
     const engine = { canvas, stopped: false, stop: () => { engine.stopped = true; } };
 
@@ -49,8 +54,8 @@ async function initEngine(canvas) {
         renderer.dispose();
         return engine;
     }
+    renderer.setPixelRatio(RENDER.PIXEL_RATIO);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 
@@ -66,10 +71,15 @@ async function initEngine(canvas) {
     window.addEventListener('resize', onResize);
 
     let frame;
+    let lastRender = -Infinity;
     function tick(time) {
+        frame = requestAnimationFrame(tick);
+        const uncapped = updateSceneAnimation.uncapped?.() ?? false;
+        // small slack so a 60hz screen lands on every other frame
+        if (!uncapped && time - lastRender < 1000 / RENDER.MAX_FPS - 4) return;
+        lastRender = time;
         updateSceneAnimation(time);
         renderer.render(scene, camera);
-        frame = requestAnimationFrame(tick);
     }
     frame = requestAnimationFrame(tick);
 
