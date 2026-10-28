@@ -774,6 +774,12 @@ body {
     font-size: inherit;
 }
 
+/* only a 400 file exists for Eurostile, so 700 is browser faux-bold */
+.about h4 {
+    font-family: 'Eurostile', sans-serif;
+    font-weight: 700;
+}
+
 .about h3 {
     clear: both;
     margin-top: 2.5rem;
@@ -785,6 +791,7 @@ body {
 .about ul {
     list-style: none;
     padding: 0;
+    margin-top: 0.75rem;
     display: grid;
     gap: 1.5rem;
 }
@@ -829,6 +836,33 @@ body {
         width: 100%;
         aspect-ratio: auto;
         align-self: stretch;
+    }
+}
+
+/* narrow phones: only the first sentence sits beside the avatar, the rest
+   drops below it full width so the avatar doesn't get too skinny */
+@media (max-width: 640px) {
+    .about-intro {
+        grid-template-columns: 40% 1fr;
+        row-gap: 0;
+    }
+
+    .about-intro-text,
+    .about-intro p {
+        display: contents;
+    }
+
+    .about .profile-avatar {
+        grid-row: 1 / 3;
+    }
+
+    .about-intro p span:first-child {
+        margin-top: 1em;
+    }
+
+    .about-intro-rest {
+        grid-column: 1 / -1;
+        margin-top: 1em;
     }
 }
 
