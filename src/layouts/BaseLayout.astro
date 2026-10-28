@@ -1,10 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import "../styles/style.css";
-const {
-    title,
-    description = "bigfum — full-stack creative building interactive, visual, and slightly unhinged things on the web.",
-} = Astro.props;
+const { title, description = "bigfum is a full-stack creative" } = Astro.props;
 const pathname = Astro.url.pathname;
 ---
 
@@ -82,6 +79,12 @@ const pathname = Astro.url.pathname;
             <span></span>
             <span></span>
         </div>
+        <div class="top-bar-blur bottom-bar-blur">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
         <div class="menu-backdrop"></div>
         <header class="top-bar"></header>
 
@@ -100,8 +103,6 @@ const pathname = Astro.url.pathname;
             </button>
 
             <script>
-                let profileSheetCleanup: (() => void) | null = null;
-
                 function setThemeColorMeta(theme: string) {
                     const color = theme === "dark" ? "#0d0e15" : "#ffffff";
                     const old = document.querySelector(
@@ -193,167 +194,14 @@ const pathname = Astro.url.pathname;
                     }
                 }
 
-                function setupProfileSheet() {
-                    const el = document.getElementById("profile-details");
-                    if (!el) return;
-
-                    if (profileSheetCleanup) {
-                        profileSheetCleanup();
-                        profileSheetCleanup = null;
-                    }
-
-                    document.body.classList.remove("gesture-locked");
-
-                    const isHome = window.location.pathname === "/";
-                    const isMobile = window.matchMedia(
-                        "(max-width: 1024px)",
-                    ).matches;
-
-                    if (!isHome || !isMobile) {
-                        el.classList.remove("profile-sheet-active");
-                        el.style.transform = "";
-                        el.style.opacity = "";
-                        return;
-                    }
-
-                    el.classList.add("profile-sheet-active");
-                    document.body.classList.add("gesture-locked");
-
-                    const reduceMotion = window.matchMedia(
-                        "(prefers-reduced-motion: reduce)",
-                    ).matches;
-
-                    if (reduceMotion) {
-                        el.style.transform = "translateY(0)";
-                        el.style.opacity = "1";
-                        return;
-                    }
-
-                    const revealDistance = 180;
-                    let progressPx = 0;
-                    let ticking = false;
-                    let touchStartY: number | null = null;
-                    let lastTouchY: number | null = null;
-                    let lastTouchTime = 0;
-                    let velocity = 0;
-                    let momentumFrame: number | null = null;
-
-                    const render = () => {
-                        const progress = Math.min(
-                            Math.max(progressPx / revealDistance, 0),
-                            1,
-                        );
-                        el.style.transform = `translateY(${(1 - progress) * 100}%)`;
-                        el.style.opacity = String(progress);
-                        ticking = false;
-                    };
-
-                    const queueRender = () => {
-                        if (!ticking) {
-                            requestAnimationFrame(render);
-                            ticking = true;
-                        }
-                    };
-
-                    const applyDelta = (deltaY: number) => {
-                        progressPx = Math.min(
-                            Math.max(progressPx + deltaY, 0),
-                            revealDistance,
-                        );
-                        queueRender();
-                    };
-
-                    const stopMomentum = () => {
-                        if (momentumFrame !== null) {
-                            cancelAnimationFrame(momentumFrame);
-                            momentumFrame = null;
-                        }
-                    };
-
-                    const runMomentum = () => {
-                        velocity *= 0.94;
-                        if (
-                            Math.abs(velocity) < 0.02 ||
-                            progressPx <= 0 ||
-                            progressPx >= revealDistance
-                        ) {
-                            momentumFrame = null;
-                            return;
-                        }
-                        applyDelta(velocity * 16);
-                        momentumFrame = requestAnimationFrame(runMomentum);
-                    };
-
-                    const onWheel = (e: WheelEvent) => {
-                        e.preventDefault();
-                        stopMomentum();
-                        applyDelta(e.deltaY);
-                    };
-
-                    const onTouchStart = (e: TouchEvent) => {
-                        stopMomentum();
-                        touchStartY = e.touches[0].clientY;
-                        lastTouchY = touchStartY;
-                        lastTouchTime = performance.now();
-                        velocity = 0;
-                    };
-
-                    const onTouchMove = (e: TouchEvent) => {
-                        if (touchStartY === null) return;
-                        const currentY = e.touches[0].clientY;
-                        const now = performance.now();
-                        const deltaY = (lastTouchY as number) - currentY;
-                        const dt = Math.max(now - lastTouchTime, 1);
-                        velocity = velocity * 0.7 + (deltaY / dt) * 0.3;
-                        lastTouchY = currentY;
-                        lastTouchTime = now;
-                        e.preventDefault();
-                        applyDelta(deltaY);
-                    };
-
-                    const onTouchEnd = () => {
-                        touchStartY = null;
-                        if (Math.abs(velocity) > 0.05) {
-                            momentumFrame = requestAnimationFrame(runMomentum);
-                        }
-                    };
-
-                    render();
-                    window.addEventListener("wheel", onWheel, {
-                        passive: false,
-                    });
-                    window.addEventListener("touchstart", onTouchStart, {
-                        passive: true,
-                    });
-                    window.addEventListener("touchmove", onTouchMove, {
-                        passive: false,
-                    });
-                    window.addEventListener("touchend", onTouchEnd);
-
-                    profileSheetCleanup = () => {
-                        stopMomentum();
-                        window.removeEventListener("wheel", onWheel);
-                        window.removeEventListener("touchstart", onTouchStart);
-                        window.removeEventListener("touchmove", onTouchMove);
-                        window.removeEventListener("touchend", onTouchEnd);
-                        document.body.classList.remove("gesture-locked");
-                    };
-                }
-
                 applyTheme();
                 setupThemeToggle();
                 setupHamburgerMenu();
-                setupProfileSheet();
-
-                window
-                    .matchMedia("(max-width: 1024px)")
-                    .addEventListener("change", setupProfileSheet);
 
                 document.addEventListener("astro:after-swap", () => {
                     applyTheme();
                     setupThemeToggle();
                     setupHamburgerMenu();
-                    setupProfileSheet();
                 });
             </script>
 
@@ -432,10 +280,6 @@ const pathname = Astro.url.pathname;
                 <div class="profile-info">
                     <p class="profile-tagline">full-stack creative.</p>
                     <p class="profile-bio">cs + ctd @ cu boulder</p>
-                    <p class="profile-bio">
-                        leading a rover team's software & always sweating the
-                        visual details
-                    </p>
                     <!-- <a
                         class="profile-link"
                         href="https://website.com/"

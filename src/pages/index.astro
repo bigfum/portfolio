@@ -1,19 +1,120 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { Image } from "astro:assets";
-import coverImage from "../assets/mtns.png";
 ---
 
 <BaseLayout title="bigfum // home">
 	<div class="home" transition:animate="none">
 		<section class="section profile-section">
-			<div class="cover-wrap">
-				<Image
-					src={coverImage}
-					alt=""
-					loading="eager"
-					fetchpriority="high"
-				/>
+			<div class="about">
+				<div class="about-intro">
+					<div class="profile-avatar" aria-hidden="true"></div>
+					<div>
+						<h2>hey, i'm jose</h2>
+						<p>
+							i'm a senior at CU Boulder studying computer science with a
+							minor in creative technology &amp; design. i lead the
+							software team for the CU Rover Team, build games, tools
+							&amp; toys on the side, and have run social media for my
+							family's business since 2016.
+						</p>
+					</div>
+				</div>
+				<p>
+					ui/ux is where i'm very strong. i have an eye for layout,
+					type, and finer details that make an interface feel right,
+					and this site is where i show that off.
+				</p>
+				<p>
+					outside of code i play electric guitar and bass, make music
+					in Ableton, and make 2d and 3d art, including 3d modeling in
+					Blender.
+				</p>
+
+				<h3>experience</h3>
+				<ul>
+					<li>
+						<h4>software team lead · CU Rover Team</h4>
+						<p>may 2025 – present</p>
+						<p>
+							leading autonomous navigation and perception for URC
+							2026 &amp; 2027 in Python and ROS, and running
+							sprints and code reviews for a team of 6.
+						</p>
+					</li>
+					<li>
+						<h4>junior data analyst · EB DevTech</h4>
+						<p>may 2024 – may 2026</p>
+						<p>
+							wrote NumPy scripts to parse POS data and automated
+							weekly reporting, saving 15+ hours of manual entry a
+							week.
+						</p>
+					</li>
+					<li>
+						<h4>social media manager · LA VECINDAD</h4>
+						<p>nov 2016 – present</p>
+						<p>
+							grew the brand to 200k+ followers across Instagram,
+							Facebook &amp; TikTok and kept a 4.8-star rating
+							across 10,000+ Google reviews.
+						</p>
+					</li>
+				</ul>
+
+				<h3>projects</h3>
+				<ul>
+					<li>
+						<h4>3d physics game · Godot</h4>
+						<p>jan 2022 – present</p>
+						<p>
+							full-body weapon system on Jolt physics with
+							simulated ballistics, plus a vehicle-entry system
+							that lets you walk around inside a moving car.
+						</p>
+					</li>
+					<li>
+						<h4>bigfum.dev</h4>
+						<p>may 2026 – present</p>
+						<p>
+							this site: designed and built from scratch with
+							Astro and Three.js, deployed on Cloudflare, 99/100
+							on Lighthouse.
+						</p>
+					</li>
+				</ul>
+
+				<h3>skills</h3>
+				<ul>
+					<li>
+						<h4>design</h4>
+						<p>
+							ui/ux, layout &amp; typography, 2d art, 3d art, 3d
+							modeling
+						</p>
+					</li>
+					<li>
+						<h4>languages</h4>
+						<p>
+							Python, C++, Java, C, SQL, GDScript, HTML/CSS,
+							JavaScript, TypeScript
+						</p>
+					</li>
+					<li>
+						<h4>software &amp; tools</h4>
+						<p>
+							ROS, Godot, Astro, OpenGL, Three.js, Docker, REST
+							APIs, Cloudflare, Git/GitHub, Linux/Unix, Blender
+						</p>
+					</li>
+					<li>
+						<h4>music</h4>
+						<p>electric guitar, bass, Ableton Live, FL Studio</p>
+					</li>
+					<li>
+						<h4>games</h4>
+						<p>game dev in Godot, physics &amp; gameplay systems</p>
+					</li>
+				</ul>
 			</div>
 		</section>
 	</div>
