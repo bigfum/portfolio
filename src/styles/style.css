@@ -28,6 +28,13 @@
     --accent-color: #f2ff00;
     --border-color: #d9d9d9;
     --form-bg: #ffffff;
+
+    /* light <-> dark fade, for the whole site and the background scene */
+    --theme-fade: 0.3s;
+    --theme-ease: cubic-bezier(0.25, 0.1, 0.25, 1); /* = ease */
+
+    /* crossfade between pages */
+    --page-fade: 0.25s;
 }
 
 [data-theme='dark'] {
@@ -77,6 +84,27 @@ main {
     height: 100vh;
     z-index: -1;
     pointer-events: none;
+}
+
+/* while the theme switches (class set by the toggle), every element fades its
+   colors at the same speed, including ones with no transition of their own */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+    transition-property: color, background-color, border-color, fill, stroke !important;
+    transition-duration: var(--theme-fade) !important;
+    transition-timing-function: var(--theme-ease) !important;
+    transition-delay: 0s !important;
+}
+
+/* page-to-page crossfade (the whole page, as one snapshot). don't give
+   anything transition:animate or transition:name: named elements are drawn as
+   their own layer above the page mid-transition, over the blur bars (which
+   then have nothing to blur) */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: var(--page-fade);
 }
 
 /* ==========================================================================
@@ -354,7 +382,7 @@ h2 {
 body {
     margin: 0;
     padding: 0;
-    background-color: var(--bg-color);
+    /* no background: html paints it, so the z-index -1 #bg-canvas shows */
     color: var(--text-color);
     font-family: 'Eurostile', sans-serif;
     min-height: 100dvh;

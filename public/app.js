@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { initPathScene } from './scenes/rooms.js';
 import { loadSceneC } from './scenes/fire.js';
+import { loadGraphScene } from './scenes/graph.js';
 
 // sc 1: box
 function loadSceneA(scene, camera) {
@@ -34,42 +35,77 @@ function loadSceneB(scene, camera) {
     };
 }
 
-async function initEngine() {
-    const canvas = document.querySelector('#bg-canvas');
-    if (!canvas) return;
+// older scenes: loadSceneA, loadSceneB, initPathScene, loadSceneC
+const scenePickers = [loadGraphScene];
+
+async function initEngine(canvas) {
+    const engine = { canvas, stopped: false, stop: () => { engine.stopped = true; } };
 
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGPURenderer({ canvas: canvas, antialias: true });
 
     await renderer.init();
+    if (engine.stopped) {
+        renderer.dispose();
+        return engine;
+    }
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 
-    const scenePickers = [loadSceneA, loadSceneB, initPathScene, loadSceneC];
-    let chosenPicker = scenePickers[Math.floor(Math.random() * scenePickers.length)];
-    chosenPicker = loadSceneC;
+    const chosenPicker = scenePickers[Math.floor(Math.random() * scenePickers.length)];
     console.log('[engine] chosen scene:', chosenPicker.name);
     const updateSceneAnimation = chosenPicker(scene, camera);
 
-    window.addEventListener('resize', () => {
+    const onResize = () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+    };
+    window.addEventListener('resize', onResize);
 
+    let frame;
     function tick(time) {
         updateSceneAnimation(time);
         renderer.render(scene, camera);
-        requestAnimationFrame(tick);
+        frame = requestAnimationFrame(tick);
     }
-    requestAnimationFrame(tick);
+    frame = requestAnimationFrame(tick);
+
+    engine.stop = () => {
+        engine.stopped = true;
+        cancelAnimationFrame(frame);
+        window.removeEventListener('resize', onResize);
+        updateSceneAnimation.dispose?.();
+        renderer.dispose();
+    };
+    return engine;
 }
 
-if (!window.bgEngineStarted) {
-    window.bgEngineStarted = true;
-    initEngine().catch(err => console.error("Engine failed to boot:", err));
-} else {
-    console.log("Engine already running seamlessly in background.");
+// the canvas is transition:persist, so it survives navigation between pages
+// that share BaseLayout. pages without it (toys) drop it; coming back gives
+// a fresh canvas, which gets a fresh scene.
+let current = null;
+
+function syncEngine() {
+    const canvas = document.querySelector('#bg-canvas');
+    if (current && current.canvas === canvas) return;
+
+    if (current) current.stop();
+    current = null;
+    if (!canvas) return;
+
+    const pending = { canvas, stop: () => { pending.cancelled = true; } };
+    current = pending;
+    initEngine(canvas)
+        .then((engine) => {
+            if (current !== pending) return engine.stop();
+            if (pending.cancelled) return engine.stop();
+            current = engine;
+        })
+        .catch(err => console.error("Engine failed to boot:", err));
 }
+
+syncEngine();
+document.addEventListener('astro:page-load', syncEngine);

@@ -46,7 +46,7 @@ const pathname = Astro.url.pathname;
                 if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
                     return "dark";
                 }
-                return "dark";
+                return "light";
             })();
 
             if (theme === "dark") {
@@ -67,19 +67,28 @@ const pathname = Astro.url.pathname;
         </script>
     </head>
     <body>
-        <div class="safe-area-fill safe-area-fill-top" aria-hidden="true">
+        <div
+            class="safe-area-fill safe-area-fill-top"
+            aria-hidden="true"
+            transition:persist="safe-area-top"
+        >
             <div class="safe-area-fill-inner"></div>
         </div>
-        <div class="safe-area-fill safe-area-fill-bottom" aria-hidden="true">
+        <div
+            class="safe-area-fill safe-area-fill-bottom"
+            aria-hidden="true"
+            transition:persist="safe-area-bottom"
+        >
             <div class="safe-area-fill-inner"></div>
         </div>
-        <div class="top-bar-blur">
+        <!-- persisted so navigating never rebuilds them mid-frame -->
+        <div class="top-bar-blur" transition:persist="top-bar-blur">
             <span></span>
             <span></span>
             <span></span>
             <span></span>
         </div>
-        <div class="top-bar-blur bottom-bar-blur">
+        <div class="top-bar-blur bottom-bar-blur" transition:persist="bottom-bar-blur">
             <span></span>
             <span></span>
             <span></span>
@@ -134,14 +143,45 @@ const pathname = Astro.url.pathname;
                         });
                 }
 
+                // after navigation: no repaint hacks here. the body transform in
+                // setThemeColorMeta briefly unpins the fixed blur bars
                 function applyTheme() {
-                    const theme = localStorage.getItem("theme") || "light";
+                    // no saved choice: keep what the head script picked
+                    const theme =
+                        localStorage.getItem("theme") ||
+                        document.documentElement.getAttribute("data-theme") ||
+                        "light";
                     document.documentElement.setAttribute("data-theme", theme);
-                    setThemeColorMeta(theme);
+                    document
+                        .querySelector('meta[name="theme-color"]')
+                        ?.setAttribute(
+                            "content",
+                            theme === "dark" ? "#0d0e15" : "#ffffff",
+                        );
+                }
+
+                let themeSwitchTimer: number | undefined;
+
+                // see .theme-switching in style.css
+                function fadeThemeChange() {
+                    const root = document.documentElement;
+                    const fade = getComputedStyle(root)
+                        .getPropertyValue("--theme-fade")
+                        .trim();
+                    const ms = fade.endsWith("ms")
+                        ? parseFloat(fade)
+                        : parseFloat(fade) * 1000;
+                    root.classList.add("theme-switching");
+                    clearTimeout(themeSwitchTimer);
+                    themeSwitchTimer = window.setTimeout(
+                        () => root.classList.remove("theme-switching"),
+                        ms + 50,
+                    );
                 }
 
                 function setupThemeToggle() {
                     const toggleTheme = () => {
+                        fadeThemeChange();
                         const isDark =
                             document.documentElement.getAttribute(
                                 "data-theme",
@@ -197,6 +237,53 @@ const pathname = Astro.url.pathname;
                 applyTheme();
                 setupThemeToggle();
                 setupHamburgerMenu();
+
+                // the incoming page's <html> has no data-theme yet, so it would
+                // render light for a moment. carry the current theme over
+                document.addEventListener("astro:before-swap", (e) => {
+                    const theme =
+                        document.documentElement.getAttribute("data-theme");
+                    if (theme) {
+                        e.newDocument.documentElement.setAttribute(
+                            "data-theme",
+                            theme,
+                        );
+                    }
+                });
+
+                // clicking a link to the page you're on does nothing. capture
+                // phase so it runs before astro's router, which skips
+                // prevented clicks
+                document.addEventListener(
+                    "click",
+                    (e) => {
+                        const link = (e.target as Element).closest?.("a");
+                        if (
+                            !link ||
+                            e.metaKey ||
+                            e.ctrlKey ||
+                            e.shiftKey ||
+                            e.altKey ||
+                            (link.target && link.target !== "_self")
+                        ) {
+                            return;
+                        }
+                        const url = new URL(link.href, location.href);
+                        if (
+                            url.origin === location.origin &&
+                            url.pathname === location.pathname &&
+                            url.search === location.search &&
+                            !url.hash
+                        ) {
+                            e.preventDefault();
+                            // still close the mobile menu if it's open
+                            if (document.querySelector(".nav-links.menu-open")) {
+                                document.getElementById("hamburger-btn")?.click();
+                            }
+                        }
+                    },
+                    { capture: true },
+                );
 
                 document.addEventListener("astro:after-swap", () => {
                     applyTheme();
@@ -308,14 +395,14 @@ const pathname = Astro.url.pathname;
             }
         </script>
 
-        <!-- <script type="module" src="/app.js"></script> -->
+        <script type="module" src="/app.js"></script>
 
         <svg
             style="height: 0; width: 0; position: absolute; visibility: hidden;"
         >
         </svg>
 
-        <canvas id="bg-canvas" transition:persist transition:animate="none"
+        <canvas id="bg-canvas" transition:persist
         ></canvas>
     </body>
 </html>
