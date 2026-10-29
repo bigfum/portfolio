@@ -1,7 +1,6 @@
-import * as THREE from 'three/webgpu';
-import { initPathScene } from './scenes/rooms.js';
-import { loadSceneC } from './scenes/fire.js';
-import { loadGraphScene } from './scenes/graph.js';
+// three.js and the scenes are imported only once the page itself has loaded
+// (see startWhenIdle), so they never compete with fonts, images or the page
+let THREE;
 
 // sc 1: box
 function loadSceneA(scene, camera) {
@@ -35,8 +34,12 @@ function loadSceneB(scene, camera) {
     };
 }
 
-// older scenes: loadSceneA, loadSceneB, initPathScene, loadSceneC
-const scenePickers = [loadGraphScene];
+// each entry loads a scene function. older scenes: loadSceneA, loadSceneB,
+// () => import('./scenes/rooms.js').then(m => m.initPathScene),
+// () => import('./scenes/fire.js').then(m => m.loadSceneC)
+const scenePickers = [
+    () => import('./scenes/graph.js').then(m => m.loadGraphScene),
+];
 
 const RENDER = {
     PIXEL_RATIO: 0.7,
@@ -45,6 +48,11 @@ const RENDER = {
 
 async function initEngine(canvas) {
     const engine = { canvas, stopped: false, stop: () => { engine.stopped = true; } };
+
+    const pickScene = scenePickers[Math.floor(Math.random() * scenePickers.length)];
+    const [three, chosenPicker] = await Promise.all([import('three/webgpu'), pickScene()]);
+    THREE = three;
+    if (engine.stopped) return engine;
 
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGPURenderer({ canvas: canvas, antialias: true });
@@ -59,7 +67,6 @@ async function initEngine(canvas) {
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 
-    const chosenPicker = scenePickers[Math.floor(Math.random() * scenePickers.length)];
     console.log('[engine] chosen scene:', chosenPicker.name);
     const updateSceneAnimation = chosenPicker(scene, camera);
 
@@ -72,10 +79,17 @@ async function initEngine(canvas) {
 
     let frame;
     let lastRender = -Infinity;
+    let lastTick = -Infinity;
+    let tickGap = 1000 / 60; // smoothed time between animation frames
     function tick(time) {
         frame = requestAnimationFrame(tick);
-        const uncapped = updateSceneAnimation.uncapped?.() ?? false;
-        // small slack so a 60hz screen lands on every other frame
+        tickGap += (Math.min(time - lastTick, 100) - tickGap) * 0.1;
+        lastTick = time;
+        // the cap only applies above 60hz. at 60 (safari, most screens)
+        // skipping frames would halve it to 30, so every frame renders
+        const capped = tickGap < 1000 / 61;
+        const uncapped = !capped || (updateSceneAnimation.uncapped?.() ?? false);
+        // small slack so frames that arrive slightly early still render
         if (!uncapped && time - lastRender < 1000 / RENDER.MAX_FPS - 4) return;
         lastRender = time;
         updateSceneAnimation(time);
@@ -98,7 +112,12 @@ async function initEngine(canvas) {
 // a fresh canvas, which gets a fresh scene.
 let current = null;
 
+// ?noscene in the url skips the scene for the whole visit, for comparing
+// performance (links drop the query, so it's read once here)
+const noScene = new URLSearchParams(location.search).has('noscene');
+
 function syncEngine() {
+    if (noScene) return;
     const canvas = document.querySelector('#bg-canvas');
     if (current && current.canvas === canvas) return;
 
@@ -117,5 +136,22 @@ function syncEngine() {
         .catch(err => console.error("Engine failed to boot:", err));
 }
 
-syncEngine();
-document.addEventListener('astro:page-load', syncEngine);
+// first boot waits for the page to finish loading and the main thread to go
+// idle. later navigations reuse the running scene, so they're unaffected
+function startWhenIdle() {
+    const start = () => {
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(syncEngine, { timeout: 2000 });
+        } else {
+            setTimeout(syncEngine, 200);
+        }
+    };
+    if (document.readyState === 'complete') start();
+    else window.addEventListener('load', start, { once: true });
+
+    document.addEventListener('astro:page-load', () => {
+        if (current || document.readyState === 'complete') syncEngine();
+    });
+}
+
+startWhenIdle();

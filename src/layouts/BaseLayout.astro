@@ -18,6 +18,16 @@ const pathname = Astro.url.pathname;
         <meta name="description" content={description} />
         <meta name="theme-color" content="#0d0e15" />
 
+        <script type="importmap" is:inline>
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.171.0/build/three.module.js",
+                    "three/webgpu": "https://unpkg.com/three@0.171.0/build/three.webgpu.js",
+                    "three/tsl": "https://unpkg.com/three@0.171.0/build/three.tsl.js"
+                }
+            }
+        </script>
+
         <link
             rel="preload"
             as="font"
@@ -67,28 +77,28 @@ const pathname = Astro.url.pathname;
         </script>
     </head>
     <body>
-        <div
-            class="safe-area-fill safe-area-fill-top"
-            aria-hidden="true"
-            transition:persist="safe-area-top"
-        >
-            <div class="safe-area-fill-inner"></div>
-        </div>
-        <div
-            class="safe-area-fill safe-area-fill-bottom"
-            aria-hidden="true"
-            transition:persist="safe-area-bottom"
-        >
-            <div class="safe-area-fill-inner"></div>
-        </div>
-        <!-- persisted so navigating never rebuilds them mid-frame -->
         <div class="top-bar-blur" transition:persist="top-bar-blur">
             <span></span>
             <span></span>
             <span></span>
             <span></span>
         </div>
-        <div class="top-bar-blur bottom-bar-blur" transition:persist="bottom-bar-blur">
+        <div
+            class="edge-tint"
+            aria-hidden="true"
+            transition:persist="edge-tint-top"
+        >
+        </div>
+        <div
+            class="edge-tint edge-tint-bottom"
+            aria-hidden="true"
+            transition:persist="edge-tint-bottom"
+        >
+        </div>
+        <div
+            class="top-bar-blur bottom-bar-blur"
+            transition:persist="bottom-bar-blur"
+        >
             <span></span>
             <span></span>
             <span></span>
@@ -113,45 +123,6 @@ const pathname = Astro.url.pathname;
 
             <script>
                 function setThemeColorMeta(theme: string) {
-                    const color = theme === "dark" ? "#0d0e15" : "#ffffff";
-                    const old = document.querySelector(
-                        'meta[name="theme-color"]',
-                    );
-                    if (old) old.remove();
-                    const fresh = document.createElement("meta");
-                    fresh.setAttribute("name", "theme-color");
-                    fresh.setAttribute("content", color);
-                    document.head.appendChild(fresh);
-
-                    document.body.style.transform = "translateZ(0)";
-                    requestAnimationFrame(() => {
-                        document.body.style.transform = "";
-                    });
-
-                    document
-                        .querySelectorAll<HTMLElement>(".safe-area-fill")
-                        .forEach((el) => {
-                            el.style.transition = "none";
-                            el.style.transform = "scaleY(0)";
-                            void el.offsetHeight;
-                            requestAnimationFrame(() => {
-                                el.style.transform = "scaleY(1)";
-                                requestAnimationFrame(() => {
-                                    el.style.transition = "";
-                                });
-                            });
-                        });
-                }
-
-                // after navigation: no repaint hacks here. the body transform in
-                // setThemeColorMeta briefly unpins the fixed blur bars
-                function applyTheme() {
-                    // no saved choice: keep what the head script picked
-                    const theme =
-                        localStorage.getItem("theme") ||
-                        document.documentElement.getAttribute("data-theme") ||
-                        "light";
-                    document.documentElement.setAttribute("data-theme", theme);
                     document
                         .querySelector('meta[name="theme-color"]')
                         ?.setAttribute(
@@ -160,28 +131,17 @@ const pathname = Astro.url.pathname;
                         );
                 }
 
-                let themeSwitchTimer: number | undefined;
-
-                // see .theme-switching in style.css
-                function fadeThemeChange() {
-                    const root = document.documentElement;
-                    const fade = getComputedStyle(root)
-                        .getPropertyValue("--theme-fade")
-                        .trim();
-                    const ms = fade.endsWith("ms")
-                        ? parseFloat(fade)
-                        : parseFloat(fade) * 1000;
-                    root.classList.add("theme-switching");
-                    clearTimeout(themeSwitchTimer);
-                    themeSwitchTimer = window.setTimeout(
-                        () => root.classList.remove("theme-switching"),
-                        ms + 50,
-                    );
+                function applyTheme() {
+                    const theme =
+                        localStorage.getItem("theme") ||
+                        document.documentElement.getAttribute("data-theme") ||
+                        "light";
+                    document.documentElement.setAttribute("data-theme", theme);
+                    setThemeColorMeta(theme);
                 }
 
                 function setupThemeToggle() {
                     const toggleTheme = () => {
-                        fadeThemeChange();
                         const isDark =
                             document.documentElement.getAttribute(
                                 "data-theme",
@@ -238,8 +198,6 @@ const pathname = Astro.url.pathname;
                 setupThemeToggle();
                 setupHamburgerMenu();
 
-                // the incoming page's <html> has no data-theme yet, so it would
-                // render light for a moment. carry the current theme over
                 document.addEventListener("astro:before-swap", (e) => {
                     const theme =
                         document.documentElement.getAttribute("data-theme");
@@ -251,9 +209,6 @@ const pathname = Astro.url.pathname;
                     }
                 });
 
-                // clicking a link to the page you're on does nothing. capture
-                // phase so it runs before astro's router, which skips
-                // prevented clicks
                 document.addEventListener(
                     "click",
                     (e) => {
@@ -277,8 +232,12 @@ const pathname = Astro.url.pathname;
                         ) {
                             e.preventDefault();
                             // still close the mobile menu if it's open
-                            if (document.querySelector(".nav-links.menu-open")) {
-                                document.getElementById("hamburger-btn")?.click();
+                            if (
+                                document.querySelector(".nav-links.menu-open")
+                            ) {
+                                document
+                                    .getElementById("hamburger-btn")
+                                    ?.click();
                             }
                         }
                     },
@@ -385,16 +344,6 @@ const pathname = Astro.url.pathname;
             </div>
         </main>
 
-        <script type="importmap">
-            {
-                "imports": {
-                    "three": "https://unpkg.com/three@0.171.0/build/three.module.js",
-                    "three/webgpu": "https://unpkg.com/three@0.171.0/build/three.webgpu.js",
-                    "three/tsl": "https://unpkg.com/three@0.171.0/build/three.tsl.js"
-                }
-            }
-        </script>
-
         <script type="module" src="/app.js"></script>
 
         <svg
@@ -402,7 +351,6 @@ const pathname = Astro.url.pathname;
         >
         </svg>
 
-        <canvas id="bg-canvas" transition:persist
-        ></canvas>
+        <canvas id="bg-canvas" transition:persist></canvas>
     </body>
 </html>

@@ -29,12 +29,10 @@
     --border-color: #d9d9d9;
     --form-bg: #ffffff;
 
-    /* light <-> dark fade, for the whole site and the background scene */
+    /* light <-> dark fade of the background scene. elements fade with their own
+       transitions: fading every element at once stutters on ios */
     --theme-fade: 0.3s;
     --theme-ease: cubic-bezier(0.25, 0.1, 0.25, 1); /* = ease */
-
-    /* crossfade between pages */
-    --page-fade: 0.25s;
 }
 
 [data-theme='dark'] {
@@ -86,25 +84,15 @@ main {
     pointer-events: none;
 }
 
-/* while the theme switches (class set by the toggle), every element fades its
-   colors at the same speed, including ones with no transition of their own */
-.theme-switching,
-.theme-switching *,
-.theme-switching *::before,
-.theme-switching *::after {
-    transition-property: color, background-color, border-color, fill, stroke !important;
-    transition-duration: var(--theme-fade) !important;
-    transition-timing-function: var(--theme-ease) !important;
-    transition-delay: 0s !important;
-}
-
-/* page-to-page crossfade (the whole page, as one snapshot). don't give
-   anything transition:animate or transition:name: named elements are drawn as
-   their own layer above the page mid-transition, over the blur bars (which
-   then have nothing to blur) */
+/* pages swap instantly, and each page's content reveals itself. a crossfade
+   shows a frozen snapshot of the old page (background scene included) over
+   the new one, doubling up the reveal. don't give anything transition:animate
+   or transition:name either: named elements are drawn as their own layer
+   above the page mid-transition, over the blur bars */
+::view-transition-group(root),
 ::view-transition-old(root),
 ::view-transition-new(root) {
-    animation-duration: var(--page-fade);
+    animation: none;
 }
 
 /* ==========================================================================
@@ -318,9 +306,50 @@ main {
     bottom: -1rem;
 }
 
+/* ios safari colors the strips under its status bar and toolbar from the
+   fixed element at each screen edge. it reads a plain background-color live,
+   but our edges are transparent fixed boxes (sidebar, top-bar) and blur bars,
+   so it snapshots pixels instead: the snapshot stalls the page on every repaint
+   and is kept until navigation, so theme changes never reach it. these strips
+   give it a color to read. over 10px tall or it ignores them; masked so the
+   page doesn't show a band. no pointer-events: none, or it looks past them */
+.edge-tint {
+    display: none;
+}
+
+@supports (-webkit-touch-callout: none) {
+    .edge-tint {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 12px;
+        z-index: 1200;
+        background-color: var(--bg-color);
+        transition: background-color 0.3s ease;
+        mask-image: linear-gradient(to bottom, black 50%, transparent);
+    }
+
+    .edge-tint-bottom {
+        top: auto;
+        bottom: 0;
+        mask-image: linear-gradient(to top, black 50%, transparent);
+    }
+}
+
+/* each layer is only as tall as its mask is visible: a backdrop blur costs
+   its whole box every frame, even where the mask hides it */
 .top-bar-blur span {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.bottom-bar-blur span {
+    top: auto;
+    bottom: 0;
 }
 
 .top-bar-blur span:nth-child(1) {
@@ -328,7 +357,8 @@ main {
     -webkit-backdrop-filter: blur(1px);
     background: color-mix(in srgb, var(--bg-color) 25%, transparent);
     transition: background-color 0.3s ease, color 0.3s ease;
-    mask-image: linear-gradient(var(--blur-dir, to bottom), black 0%, black 25%, transparent 45%);
+    mask-image: linear-gradient(var(--blur-dir, to bottom), black 0%, black 55.6%, transparent 100%);
+    height: 45%;
 }
 
 .top-bar-blur span:nth-child(2) {
@@ -336,7 +366,8 @@ main {
     -webkit-backdrop-filter: blur(3px);
     background: color-mix(in srgb, var(--bg-color) 50%, transparent);
     transition: background-color 0.3s ease, color 0.3s ease;
-    mask-image: linear-gradient(var(--blur-dir, to bottom), black 0%, black 18%, transparent 40%);
+    mask-image: linear-gradient(var(--blur-dir, to bottom), black 0%, black 45%, transparent 100%);
+    height: 40%;
 }
 
 .top-bar-blur span:nth-child(3) {
@@ -344,7 +375,8 @@ main {
     -webkit-backdrop-filter: blur(7px);
     background: color-mix(in srgb, var(--bg-color) 75%, transparent);
     transition: background-color 0.3s ease, color 0.3s ease;
-    mask-image: linear-gradient(var(--blur-dir, to bottom), black 0%, black 12%, transparent 35%);
+    mask-image: linear-gradient(var(--blur-dir, to bottom), black 0%, black 34.3%, transparent 100%);
+    height: 35%;
 }
 
 .top-bar-blur span:nth-child(4) {
@@ -352,7 +384,8 @@ main {
     -webkit-backdrop-filter: blur(14px);
     background: color-mix(in srgb, var(--bg-color) 100%, transparent);
     transition: background-color 0.3s ease, color 0.3s ease;
-    mask-image: linear-gradient(var(--blur-dir, to bottom), black 0%, black 6%, transparent 25%);
+    mask-image: linear-gradient(var(--blur-dir, to bottom), black 0%, black 24%, transparent 100%);
+    height: 25%;
 }
 
 /* ==========================================================================
